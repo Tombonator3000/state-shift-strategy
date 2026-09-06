@@ -1,3 +1,4 @@
+import { USA_STATES } from '@/data/usaStates';
 import type { GameCard } from '@/rules/mvp';
 import type { CompositeStory } from '@/types/news';
 import type { GameEvent } from '@/data/eventDatabase';
@@ -24,6 +25,8 @@ const beats: Array<[RegExp, Beat]> = [
 function beatFor(card: GameCard): Beat {
   const match = beats.find(([pattern]) => pattern.test(`${card.name} ${(card.tags ?? []).join(' ')}`));
   if (match) return match[1];
+  const namedWitness = card.name.match(/^(.{1,40})['’]s\b/u)?.[1];
+  if (namedWitness) return { key: card.type, subject: namedWitness, incident: `${namedWitness} submitted a witness statement the official record could not accommodate`, evidence: 'a signed account attached to a contradictory briefing', twist: 'the witness was asked to correct their recollection to match the approved minutes' };
   return { key: card.type, subject: card.faction === 'government' ? 'a departmental spokesperson' : 'a local correspondent', incident: card.type === 'ZONE' ? 'a field investigation drew unusual attention in the state' : card.type === 'ATTACK' ? 'a disputed briefing put rival officials on the defensive' : 'a fresh dispatch reached the night desk', evidence: 'a source file whose official explanation does not match the witness account', twist: 'the Joint Spin Bureau confirmed receiving the question and denied receiving the answer' };
 }
 const signed = (n: number) => `${n > 0 ? '+' : ''}${n}`;
@@ -43,7 +46,8 @@ export function composeRoundEdition(plays: EditionPlay[], events: GameEvent[], r
   const selected = sourcePlays.slice(0, 3);
   const evidence = selected.map(p => beatFor(p.card));
   const [first, second, third] = evidence;
-  const location = selected.map(p => p.targetState).find(Boolean)?.replace(/[_-]/g, ' ') ?? 'the district';
+  const target = selected.map(p => p.targetState).find(Boolean);
+  const location = target ? stateLabel(target) : 'the district';
   const keys = new Set(evidence.map(b => b.key));
   let headline: string;
   let subhead: string;
@@ -59,7 +63,7 @@ export function composeRoundEdition(plays: EditionPlay[], events: GameEvent[], r
     subhead = second ? `A second report turns an isolated sighting into a problem for the Joint Spin Bureau.` : `A dispatch from ${location} leaves the official version short of an explanation.`;
     const setup = `${first.incident[0].toUpperCase()}${first.incident.slice(1)}. Reporters recovered ${first.evidence}.`;
     const twist = second ? `The inquiry widened when ${second.incident}. Comparing the two reports, the night desk found ${second.evidence}. The Bureau was asked to explain why both records had arrived under the same case number.` : `Officials were asked to reconcile the witness account with the record. Instead, ${first.twist}. The editor kept both versions in the file.`;
-    const escalation = third ? `Before the file could close, ${third.incident}. This added ${third.evidence} to an already inconvenient inquiry. According to the latest revision, ${third.twist}.` : `At deadline, ${second?.twist ?? first.twist}. The Joint Spin Bureau marked the file “resolved”, then requested another copy.`;
+    const escalation = third ? `Before the file could close, ${third.incident}. This added ${third.evidence} to an already inconvenient inquiry. According to the latest revision, ${third.twist}.` : second ? `At deadline, ${second.twist}. The Joint Spin Bureau marked the file “resolved”, then requested another copy.` : 'The copy filed for public inspection contained the conclusion but none of the supporting pages. The night desk retained its own copy.';
     body = [setup, twist, escalation];
   }
   const opposition = records.filter(p => p.player === 'ai');
@@ -69,3 +73,9 @@ export function composeRoundEdition(plays: EditionPlay[], events: GameEvent[], r
 
 // The engine advances the round counter before opening the completed round’s paper.
 export const completedRoundNumber = (incomingRound: number) => Math.max(1, incomingRound - 1);
+
+export function stateLabel(target?: string | null): string {
+  if (!target) return 'Nationwide';
+  const key = target.trim().toLowerCase();
+  return USA_STATES.find(state => [state.id, state.name, state.abbreviation].some(value => value.toLowerCase() === key))?.name ?? 'Undisclosed state';
+}

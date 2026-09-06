@@ -27,3 +27,10 @@ describe('one press queue', () => {
     rerender(<PressDispatchTray records={[]} suspended={false} />); expect(screen.getByRole('heading', { name: 'Cryptid Summit' })).toBeTruthy();
   });
 });
+
+it('opens the persistent archive from the mobile menu event', () => {
+  render(<PressDispatchTray records={[]} />);
+  act(() => window.dispatchEvent(new Event('open-press-archive')));
+  expect(screen.getByRole('dialog')).toBeTruthy();
+  expect(screen.getByRole('heading', { name: 'The dispatch archive' })).toBeTruthy();
+});

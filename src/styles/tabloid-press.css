@@ -225,3 +225,10 @@ body { background: var(--press-paper); }
   .desktop-played-column .front-page-layout > div { grid-template-columns: 1fr; }
   .desktop-played-column section > .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
+
+.mobile-hand-zone { color: var(--press-ink); }
+.mobile-hand-heading h2 span, .mobile-play-pips > span, .mobile-hand-help { color: #48564d; }
+.mobile-play-pips i { border-color: var(--press-teal); background: var(--press-teal); }
+.mobile-play-pips i[data-used=true] { background: transparent; }
+.mobile-hand-rail { scrollbar-color: #718c7d var(--press-paper); }
+@media (max-width: 1023px) { .press-archive-toggle { display: none; } }

@@ -27,8 +27,10 @@ export function PressDispatchTray({ records, suspended = false }: { records: Car
   useEffect(() => { enqueue(records.map(dispatchForPlay)); }, [records]);
   useEffect(() => {
     const combo = (event: Event) => enqueue([(event as CustomEvent<PressDispatch>).detail]);
+    const openArchive = () => setShowArchive(true);
     window.addEventListener('press-dispatch', combo);
-    return () => window.removeEventListener('press-dispatch', combo);
+    window.addEventListener('open-press-archive', openArchive);
+    return () => { window.removeEventListener('press-dispatch', combo); window.removeEventListener('open-press-archive', openArchive); };
   }, []);
   const current = queue[0];
   useEffect(() => {
