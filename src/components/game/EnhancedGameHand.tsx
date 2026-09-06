@@ -2,6 +2,7 @@ import React, { useState, useRef, useMemo } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
 import BaseCard from '@/components/game/cards/BaseCard';
+import { MobileHandCard } from './mobile/MobileHandCard';
 import type { GameCard, MVPCardType } from '@/rules/mvp';
 import { MVP_CARD_TYPES } from '@/rules/mvp';
 import { useAudioContext } from '@/contexts/AudioContext';
@@ -14,6 +15,7 @@ import { ExtensionCardBadge } from './ExtensionCardBadge';
 import { getArticleForCard } from '@/data/cardArticles/articleDatabase';
 
 interface EnhancedGameHandProps {
+  compact?: boolean;
   cards: GameCard[];
   onPlayCard: (cardId: string) => void | Promise<void>;
   disabled?: boolean;
@@ -37,6 +39,7 @@ interface EnhancedGameHandProps {
 }
 
 const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
+  compact = false,
   cards,
   onPlayCard,
   disabled,
@@ -231,11 +234,11 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
 
   return (
     <div
-      className="relative h-full"
+      className={clsx('relative h-full', compact && 'mobile-hand-content')}
       ref={handRef}
       onPointerLeave={clearHover}
     >
-      {playingCard && (
+      {playingCard && !compact && (
         <div role="status" className="mb-3 flex items-center gap-2 rounded border border-white/30 bg-black/30 p-3 text-sm text-white">
           <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
           Deploying asset…
@@ -381,7 +384,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                 onPointerLeave={clearHover}
                 aria-grabbed={isDraggingThisCard}
               >
-                <BaseCard
+                {compact ? <MobileHandCard card={card} affordable={canAfford} selected={isSelected} queued={isQueuedForDiscard} busy={isPlaying || isLoading} /> : <BaseCard
                   card={card}
                   hideStamp
                   polaroidHover={false}
@@ -396,13 +399,13 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
                     draggingCardId === card.id && 'scale-[0.97] opacity-80'
                   )}
                   overlay={overlay}
-                />
+                />}
               </button>
-              <div className="mt-3 flex items-start justify-between gap-2">
+              {!compact && <div className="mt-3 flex items-start justify-between gap-2">
                 <p className="newsroom-card-caption text-sm font-semibold leading-snug text-white">{card.name}</p>
                 <span className="shrink-0 text-sm font-bold text-amber-200">{card.cost} IP</span>
-              </div>
-                {onToggleDiscard && (
+              </div>}
+                {!compact && onToggleDiscard && (
                   <button
                     type="button"
                     disabled={discardToggleDisabled}

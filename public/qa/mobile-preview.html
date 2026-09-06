@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Paranoid Times — responsive QA</title>
+  <style>
+    * { box-sizing: border-box; } body { margin: 0; background: #23332f; color: #efe8d7; font: 14px system-ui, sans-serif; }
+    header { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 20px; border-bottom: 1px solid #52655c; }
+    h1 { margin: 0; font: bold 18px Georgia, serif; } select, a { padding: 9px; border-radius: 5px; background: #f3eee2; color: #203c31; }
+    p { margin: 0; color: #c0d0c5; font-size: 12px; } main { padding: 16px; overflow: auto; } iframe { display: block; border: 0; background: #f3eee2; box-shadow: 0 8px 35px #0006; margin-inline: auto; }
+  </style>
+</head>
+<body>
+  <header><h1>Responsive QA</h1><label>Viewport <select id="viewport"><option value="390x844">390 × 844</option><option value="360x640">360 × 640</option><option value="844x390">844 × 390 — landscape</option><option value="768x1024">768 × 1024 — tablet</option><option value="1280x800">1280 × 800 — desktop</option></select></label><a href="../">Open game</a><p>Live game in a sized iframe. This checks layout, not device performance.</p></header>
+  <main><iframe title="Game viewport" src="../" width="390" height="844" allow="fullscreen"></iframe></main>
+  <script>
+    const selector = document.getElementById('viewport');
+    const game = document.querySelector('iframe');
+    selector.addEventListener('change', () => {
+      const [width, height] = selector.value.split('x');
+      game.width = width;
+      game.height = height;
+    });
+  </script>
+</body>
+</html>

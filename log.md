@@ -1,3 +1,14 @@
+# 2026-09-06T02:56:25Z — Ny mobilflate klar for PR
+
+Brukeren bekrefter at mobilspillet fungerer og ber om bedre layout, grafikk og effekter.
+Ny kampflate under 1024 CSS-piksler samler status, brett, hånd og turhandling.
+Søkbare ZONE-mål, fast handlingskvittering, bedre kortminiatyrer, menyer og hjelp.
+174 tester / 0 feil / 649 assertions. Typer og bygg består; lint 410/51 uendret,
+dekning 65.02/71.92 og exit 1. Visuell kontroll av ny versjon venter på publisering.
+[Rapport](docs/analysis/mobile-newsroom-2026-09-06/README.md). Ingen regelendringer.
+
+---
+
 # 2026-09-06T00:37:33Z — PR #802 merget og Pages-publisering bekreftet
 
 Merge skjedde 2026-09-06T00:35:43Z, commit `30821063777f5bdb15097dff14ea3bf9919d3de9`, etter brukerens instruksjon.

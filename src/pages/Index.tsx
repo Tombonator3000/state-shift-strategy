@@ -7,6 +7,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import EnhancedUSAMap from '@/components/game/EnhancedUSAMap';
 import EnhancedGameHand from '@/components/game/EnhancedGameHand';
+import { MobileBattleLayout } from '@/components/game/mobile/MobileBattleLayout';
+import { useIsMobile } from '@/hooks/use-mobile';
 import BaseCard from '@/components/game/cards/BaseCard';
 import PlayedCardsDock from '@/components/game/PlayedCardsDock';
 import CardDetailOverlay from '@/components/game/CardDetailOverlay';
@@ -256,6 +258,7 @@ type DropEvaluation =
   | { type: 'state'; stateId: string; status: 'valid' | 'invalid'; label?: string };
 
 const Index = () => {
+  const isCompactBattle = useIsMobile(1024);
   const [showMenu, setShowMenu] = useState(true);
   const [showIntro, setShowIntro] = useState(true);
   const [showOnlineLobby, setShowOnlineLobby] = useState(false);
@@ -2263,9 +2266,6 @@ const Index = () => {
     if (!isHumanActionWindow(gameState) || gameState.cardsPlayedThisTurn >= 3) return;
     selectTargetState(null);
     selectCard(cardId);
-    if (gameState.hand.find(card => card.id === cardId)?.type === 'ZONE' && window.innerWidth < 1024) {
-      document.getElementById('game-map-board')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
-    }
     audio.playSFX('hover');
   };
 
@@ -3221,6 +3221,62 @@ const Index = () => {
     </div>
   );
 
+  const contextualHelp = (
+    <ContextualHelp
+      inline={isCompactBattle}
+      gamePhase={gameState.phase}
+      currentPlayer={gameState.currentPlayer}
+      selectedCard={gameState.selectedCard}
+      playerIP={gameState.ip}
+      controlledStates={gameState.controlledStates.length}
+      hand={gameState.hand}
+      targetStateId={gameState.targetState}
+      onSuggestMove={(suggestion) => {
+        toast(suggestion, {
+          duration: 4000,
+          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
+        });
+      }}
+    />
+  );
+
+  const battleMap = (
+    <EnhancedUSAMap
+      compact={isCompactBattle}
+      states={gameState.states}
+      onStateClick={handleStateClick}
+      selectedZoneCard={gameState.selectedCard}
+      selectedState={gameState.targetState}
+      audio={audio}
+      playerFaction={gameState.faction}
+      currentTurn={gameState.turn}
+      dragTarget={dragHoverState}
+      isDraggingCard={Boolean(draggedCardState)}
+    />
+  );
+
+  const battleHand = (
+    <EnhancedGameHand
+      compact={isCompactBattle}
+      cards={gameState.hand}
+      onPlayCard={handlePlayCard}
+      onSelectCard={handleSelectCard}
+      selectedCard={gameState.selectedCard}
+      disabled={handInteractionDisabled}
+      currentIP={gameState.ip}
+      loadingCard={loadingCard}
+      discardQueue={pendingDiscards}
+      onToggleDiscard={handleToggleDiscard}
+      discardEnabled={canQueueDiscards}
+      onCardDragStart={handleHandDragStart}
+      onCardDragMove={handleHandDragMove}
+      onCardDragEnd={handleHandDragEnd}
+      draggingCardId={draggedCardState?.card.id ?? null}
+      onPreviewArticle={handlePreviewArticle}
+      isArticlePreviewOpen={previewState.isOpen}
+    />
+  );
+
   const leftPaneContent = (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <div className="flex min-h-0 flex-1 flex-col gap-4">
@@ -3233,17 +3289,7 @@ const Index = () => {
                   <Button variant="outline" onClick={() => { selectCard(null); selectTargetState(null); }}>Cancel</Button>
                 </div>
               )}
-              <EnhancedUSAMap
-                states={gameState.states}
-                onStateClick={handleStateClick}
-                selectedZoneCard={gameState.selectedCard}
-                selectedState={gameState.targetState}
-                audio={audio}
-                playerFaction={gameState.faction}
-                currentTurn={gameState.turn}
-                dragTarget={dragHoverState}
-                isDraggingCard={Boolean(draggedCardState)}
-              />
+              {battleMap}
             </div>
           </div>
         </div>
@@ -3330,24 +3376,7 @@ const Index = () => {
           </Tooltip>
         </header>
         <div className="newsroom-hand-scroll flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden px-3 py-3">
-          <EnhancedGameHand
-            cards={gameState.hand}
-            onPlayCard={handlePlayCard}
-            onSelectCard={handleSelectCard}
-            selectedCard={gameState.selectedCard}
-            disabled={handInteractionDisabled}
-            currentIP={gameState.ip}
-            loadingCard={loadingCard}
-            discardQueue={pendingDiscards}
-            onToggleDiscard={handleToggleDiscard}
-            discardEnabled={canQueueDiscards}
-            onCardDragStart={handleHandDragStart}
-            onCardDragMove={handleHandDragMove}
-            onCardDragEnd={handleHandDragEnd}
-            draggingCardId={draggedCardState?.card.id ?? null}
-            onPreviewArticle={handlePreviewArticle}
-            isArticlePreviewOpen={previewState.isOpen}
-          />
+          {battleHand}
         </div>
         <footer className="border-t border-newspaper-border/60 px-3 pb-3 pt-2 sm:pt-3">
           <p role="status" className="mb-3 text-sm leading-relaxed">
@@ -3378,7 +3407,7 @@ const Index = () => {
 
   return (
     <>
-      <BreakingNewsTicker />
+      {!isCompactBattle && <BreakingNewsTicker />}
       {/* Online Multiplayer: Turn lock overlay + connection status */}
       {isOnlineGame && !isOnlineLocalTurn && (
         <TurnLockOverlay
@@ -3396,11 +3425,44 @@ const Index = () => {
           />
         </div>
       )}
-      <ResponsiveLayout
-        masthead={mastheadContent}
-        leftPane={leftPaneContent}
-        rightPane={rightPaneContent}
-      />
+      {isCompactBattle ? (
+        <MobileBattleLayout
+          round={gameState.turn}
+          faction={gameState.faction}
+          ip={gameState.ip}
+          rivalIP={gameState.aiIP}
+          truth={gameState.truth}
+          states={gameState.states}
+          playsUsed={gameState.cardsPlayedThisTurn}
+          handCount={gameState.hand.length}
+          discardCount={pendingDiscards.length}
+          discardCost={discardPreview.ipCost}
+          aiTurn={gameState.currentPlayer === 'ai'}
+          locked={isPlayerActionLocked}
+          resolving={Boolean(loadingCard)}
+          targetCard={gameState.hand.find(card => card.id === gameState.selectedCard && card.type === 'ZONE') ?? null}
+          playedCards={gameState.cardsPlayedThisRound}
+          board={<div id="game-map-board">{battleMap}</div>}
+          hand={battleHand}
+          briefing={<>{renderSidebar()}{contextualHelp}</>}
+          menu={close => <div className="mobile-menu-actions">
+            <button type="button" onClick={() => { close(); setShowInGameOptions(true); audio.playSFX('click'); }}>Game settings</button>
+            <button type="button" onClick={() => { close(); setPlayerHubSource('game'); setShowPlayerHub(true); audio.playSFX('click'); }}>Player hub & archive</button>
+            <button type="button" onClick={() => { close(); toggleFullscreen(); }}>{isFullscreen ? 'Exit full screen' : 'Full screen'}</button>
+            <button type="button" onClick={() => { close(); setBalancingInitialView('analysis'); setShowBalancing(true); }}>Card lab</button>
+          </div>}
+          onStateClick={handleStateClick}
+          onCancelTarget={() => { selectCard(null); selectTargetState(null); }}
+          onInspectPlayed={setInspectedPlayedCard}
+          onEndTurn={handleEndTurn}
+        />
+      ) : (
+        <ResponsiveLayout
+          masthead={mastheadContent}
+          leftPane={leftPaneContent}
+          rightPane={rightPaneContent}
+        />
+      )}
 
       <Toaster
         position="top-right"
@@ -3514,21 +3576,7 @@ const Index = () => {
         />
       )}
 
-      <ContextualHelp
-        gamePhase={gameState.phase}
-        currentPlayer={gameState.currentPlayer}
-        selectedCard={gameState.selectedCard}
-        playerIP={gameState.ip}
-        controlledStates={gameState.controlledStates.length}
-        hand={gameState.hand}
-        targetStateId={gameState.targetState}
-        onSuggestMove={(suggestion) => {
-          toast(suggestion, {
-            duration: 4000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-          });
-        }}
-      />
+      {!isCompactBattle && contextualHelp}
 
       <InteractiveOnboarding
         isActive={showOnboarding}

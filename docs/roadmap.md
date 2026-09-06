@@ -8,6 +8,18 @@ Oppstarts- og katalogrettelsene er merget i [PR #802](https://github.com/Tombona
 2026-09-06T00:35:43Z. PR-kontrollene for typer/tester/bygg og Pages-publiseringen består.
 Lint/dekning og ekte nettleserreise har fortsatt statusen som er beskrevet nedenfor.
 
+## Mobilredesign — 2026-09-06
+
+Brukeren bekrefter at mobilspillet fungerer, men at layouten er vanskelig å bruke.
+Ny mobilflate er implementert på `feat/mobile-newsroom-2026-09-06`: fast kampstatus,
+søkbare ZONE-mål, Map/States/Played, sveipbar hånd og én End turn-knapp. Korttypene
+får tydeligere grafikk og handlingsresultatene står igjen over hånden. Hjelp og
+opplæring er tilpasset. 174 tester består; typer/bygg består; lint 410/51 uendret.
+Publisering og visuell størrelseskontroll gjenstår i dette kildekodepunktet.
+[Design og verifikasjon](analysis/mobile-newsroom-2026-09-06/README.md).
+Neste praktiske kontroll: én kamp med én hånd på brukerens telefon, inkludert
+nettleserens adressefelt/sikre marger og de eksisterende effektenes ytelse.
+
 ## Mål og spillopplevelse
 
 Spilleren leder Truth Seekers eller Government. Hver tur brukes opptil tre kort til å
