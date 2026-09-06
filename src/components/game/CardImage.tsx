@@ -8,9 +8,10 @@ interface CardImageProps {
   cardId: string;
   className?: string;
   fit?: 'cover' | 'contain';
+  fallback?: React.ReactNode;
 }
 
-const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'cover' }) => {
+const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'cover', fallback }) => {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageExtension, setImageExtension] = useState<'jpg' | 'png'>('jpg');
@@ -102,6 +103,12 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
     'h-full w-full',
     fit === 'contain' ? 'object-contain' : 'object-cover',
   );
+
+  // Preserve card-specific and expansion art. Compact hands can illustrate the
+  // generic placeholder with a lightweight, type-specific vector instead.
+  if (fallback && (imageError || !canLoadDirect) && fallbackImagePath.endsWith('e7c952a9-333a-4f6b-b1b5-f5aeb6c3d9c1.png')) {
+    return <div className={containerClassName}>{fallback}</div>;
+  }
 
   return (
     <div className={containerClassName}>

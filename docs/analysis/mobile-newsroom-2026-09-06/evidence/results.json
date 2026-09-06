@@ -1,0 +1,63 @@
+{
+  "recordedAt": "2026-09-06T02:56:25Z",
+  "base": "268be5ac0d9fadaf7578b082e2a3bda2afaa9ec4",
+  "checks": [
+    {
+      "command": "npm run build",
+      "startedAt": "2026-09-06T02:57:14.424393+00:00",
+      "seconds": 13.76,
+      "exitCode": 0,
+      "log": "build-pages.log"
+    },
+    {
+      "command": "npm run build",
+      "startedAt": "2026-09-06T02:53:07.445650+00:00",
+      "seconds": 13.55,
+      "exitCode": 0,
+      "log": "build.log"
+    },
+    {
+      "command": "npm exec --yes --package=bun@1.4.2 -- bun test --coverage --coverage-reporter=text",
+      "startedAt": "2026-09-06T02:57:14.423547+00:00",
+      "seconds": 12.0,
+      "exitCode": 1,
+      "log": "coverage.log"
+    },
+    {
+      "command": "npm run lint",
+      "startedAt": "2026-09-06T02:57:14.415760+00:00",
+      "seconds": 7.0,
+      "exitCode": 1,
+      "log": "lint.log"
+    },
+    {
+      "command": "npm run typecheck",
+      "startedAt": "2026-09-06T02:57:14.422493+00:00",
+      "seconds": 13.74,
+      "exitCode": 0,
+      "log": "typecheck.log"
+    }
+  ],
+  "tests": {
+    "pass": 174,
+    "fail": 0,
+    "assertions": 649,
+    "files": 42
+  },
+  "lint": {
+    "errors": 410,
+    "warnings": 51,
+    "baselineUnchanged": true
+  },
+  "coverage": {
+    "functions": 65.02,
+    "lines": 71.92,
+    "thresholdsUnchanged": true,
+    "status": "fails existing thresholds"
+  },
+  "browser": {
+    "baseline": "desktop observed 1363x936",
+    "newLayout": "pending deployed viewport inspection",
+    "physicalDevicePerformance": "unmeasured"
+  }
+}

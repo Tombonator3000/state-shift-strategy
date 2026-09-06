@@ -73,6 +73,7 @@ interface EnhancedUSAMapProps {
   currentTurn: number;
   dragTarget?: { stateId: string; status: 'valid' | 'invalid'; label?: string } | null;
   isDraggingCard?: boolean;
+  compact?: boolean;
 }
 
 const formatTruthDeltaForFaction = (delta: number, playerFaction: 'truth' | 'government'): string => {
@@ -229,7 +230,8 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
   playerFaction,
   currentTurn,
   dragTarget,
-  isDraggingCard = false
+  isDraggingCard = false,
+  compact = false,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -325,7 +327,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     const computeDimensions = (entry?: ResizeObserverEntry) => {
       const width = entry?.contentRect?.width ?? containerRef.current?.clientWidth ?? MAP_BASE_WIDTH;
       const idealHeight = width * MAP_ASPECT_RATIO;
-      const height = Math.max(idealHeight, 260);
+      const height = compact ? Math.max(185, Math.min(idealHeight, 310)) : Math.max(idealHeight, 260);
       setDimensions(prev => {
         if (prev.width === width && prev.height === height) {
           return prev;
@@ -346,7 +348,7 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [compact]);
 
   useEffect(() => {
     setZoomLevel(1);

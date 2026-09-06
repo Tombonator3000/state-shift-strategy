@@ -52,7 +52,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
     {
       id: 'map',
       title: '🗺️ The Conspiracy Map',
-      description: 'This is the USA map. Red states are yours, blue are AI-controlled, gray are neutral. Click states to target them.',
+      description: 'The map shows who controls each state. On mobile, follow the You/Rival legend or open States for a searchable list with larger targets.',
       target: '#map-container'
     },
     {
@@ -143,8 +143,8 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
       {/* Overlay */}
       <div className="fixed inset-0 bg-black/60 z-50 animate-fade-in">
         {/* Onboarding Card */}
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-60 animate-slide-in-right">
-          <Card className="p-6 max-w-md bg-newspaper-text text-newspaper-bg border-4 border-truth-red shadow-2xl">
+        <div className="fixed bottom-4 left-1/2 w-[calc(100%-2rem)] max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto transform -translate-x-1/2 z-60 animate-slide-in-right">
+          <Card className="p-4 sm:p-6 [&_button]:min-h-11 [&_button]:min-w-11 bg-newspaper-text text-newspaper-bg border-4 border-truth-red shadow-2xl">
             {/* Header */}
             <div className="flex justify-between items-start mb-4">
               <div className="flex items-center gap-2">
@@ -159,6 +159,7 @@ const InteractiveOnboarding = ({ isActive, onComplete, onSkip, gameState }: Inte
                 variant="ghost"
                 size="sm"
                 onClick={skipOnboarding}
+                aria-label="Close tutorial"
                 className="h-6 w-6 p-0 hover:bg-newspaper-bg/20"
               >
                 <X size={14} />

@@ -2,6 +2,35 @@
 
 This document provides a chronological record of gameplay-impacting changes merged into State Shift Strategy. Each entry should include the merge date and a brief, human-readable summary so future contributors can quickly understand how the game has evolved.
 
+## Unmerged — 2026-09-06T02:57:13Z: mobile newsroom redesign
+
+User-requested mobile layout, compact cards, searchable state targets, persistent
+play results and accessible menus. Existing rules and card art are preserved.
+174 tests pass; typecheck/build pass; lint 410 errors / 51 warnings unchanged.
+Coverage exits 1 against existing thresholds. New visual inspection awaits deploy.
+
+Files prepared:
+- `UPDATES_LOG.md`
+- `__tests__/game/mobileBattle.test.tsx`
+- `components.json`
+- `docs/analysis/mobile-newsroom-2026-09-06/README.md`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/check-logs.tar.gz`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/results.json`
+- `docs/analysis/mobile-newsroom-2026-09-06/evidence/tested-source-sha256.json`
+- `docs/roadmap.md`
+- `log.md`
+- `public/qa/mobile-preview.html`
+- `src/components/game/CardImage.tsx`
+- `src/components/game/ContextualHelp.tsx`
+- `src/components/game/EnhancedGameHand.tsx`
+- `src/components/game/EnhancedUSAMap.tsx`
+- `src/components/game/InteractiveOnboarding.tsx`
+- `src/components/game/mobile/MobileBattleLayout.tsx`
+- `src/components/game/mobile/MobileHandCard.tsx`
+- `src/hooks/use-mobile.tsx`
+- `src/pages/Index.tsx`
+- `src/styles/mobile-battle.css`
+
 ## 2026-09-06 — Startup recovery and real catalog merged (#802)
 
 Merge timestamp: 2026-09-06T00:35:43Z. Commit `30821063777f5bdb15097dff14ea3bf9919d3de9`.

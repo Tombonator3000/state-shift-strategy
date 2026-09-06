@@ -16,6 +16,7 @@ interface HelpTip {
 }
 
 interface ContextualHelpProps {
+  inline?: boolean;
   gamePhase: string;
   currentPlayer: 'human' | 'ai';
   selectedCard?: string;
@@ -27,6 +28,7 @@ interface ContextualHelpProps {
 }
 
 const ContextualHelp = ({
+  inline = false,
   gamePhase,
   currentPlayer,
   selectedCard,
@@ -103,11 +105,12 @@ const ContextualHelp = ({
   return (
     <>
       {/* Floating Help Button */}
-      <div className="fixed bottom-4 right-4 z-40">
+      <div className={inline ? 'mt-4' : 'fixed bottom-4 right-4 z-40'}>
         <Button
           variant="outline"
           size="sm"
-          className="bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 shadow-lg"
+          className="min-h-11 bg-newspaper-text text-newspaper-bg hover:bg-newspaper-text/80 shadow-lg"
+          aria-expanded={showSuggestions}
           onClick={() => setShowSuggestions(!showSuggestions)}
         >
           <HelpCircle size={16} />
@@ -117,7 +120,7 @@ const ContextualHelp = ({
 
       {/* Tutorial Hints Panel */}
       {showSuggestions && (
-        <div className="fixed bottom-16 right-4 z-50 animate-fade-in">
+        <div className={inline ? 'mt-2' : 'fixed bottom-16 right-4 z-50 animate-fade-in'}>
           <Card className="p-4 max-w-xs bg-newspaper-text text-newspaper-bg border-2 border-truth-red shadow-xl">
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-bold text-sm">📚 Smart Assistant</h3>
@@ -125,7 +128,8 @@ const ContextualHelp = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowSuggestions(false)}
-                className="h-6 w-6 p-0 hover:bg-newspaper-bg/20"
+                aria-label="Close game help"
+                className="h-11 w-11 p-0 hover:bg-newspaper-bg/20"
               >
                 <X size={12} />
               </Button>

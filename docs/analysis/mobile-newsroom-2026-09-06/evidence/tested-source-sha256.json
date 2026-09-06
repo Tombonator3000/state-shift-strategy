@@ -1,0 +1,15 @@
+{
+  "__tests__/game/mobileBattle.test.tsx": "aa97662db95f86ccf20e382eedc842ad4cffa384536195a11969994b9274dc1b",
+  "components.json": "c2583a00658b116eaf9ccbf013f264c847492680e8ec321118e5673a915f4984",
+  "public/qa/mobile-preview.html": "f8d6d3aa89d20caf42e1e07373ef6f8837906d15481f70df1ba21ef1006b8dc2",
+  "src/components/game/CardImage.tsx": "237fc735c8acc1dcbea91f07685ec53be95da447679e861d532ec0a27a421ac1",
+  "src/components/game/ContextualHelp.tsx": "8d5503f159d4183bfbce8193ab9498cb2a82e88c722e72dbcc4f8977e6eb36c8",
+  "src/components/game/EnhancedGameHand.tsx": "888ee667ef16ef87e3c9a5bc8d8145fc0c3b4352eb2c2f830a5a9c0de6c7c9b9",
+  "src/components/game/EnhancedUSAMap.tsx": "a813c6ad1699c7faa2548aea8948f33060cb6ad13c52486f13eec14a5fc66caa",
+  "src/components/game/InteractiveOnboarding.tsx": "f956695be7e5d7a2337e0a21b2d2350e3ce73cb2437fa4d8853e884b8e5581c2",
+  "src/components/game/mobile/MobileBattleLayout.tsx": "c26eb7fab3347a98fad0e7a870809e9bf7fca0c1343bf3e1458e6a5269182132",
+  "src/components/game/mobile/MobileHandCard.tsx": "3f88233bef331bc9064ba7be65abf96510f8746b19208e7418bbecc1af3a6d12",
+  "src/hooks/use-mobile.tsx": "f348db0e503790bc8955a4e39b7f488f112b622137dd91e89af18e4b042ddaa8",
+  "src/pages/Index.tsx": "1c4587c6b8b153c4ee7bf56f37390a1b08a8f0e1a77fca5ecb73e677f65c4e52",
+  "src/styles/mobile-battle.css": "beb2577df04fd9f9a41bf9de73cdd573491fef7f8f70c7bd14ce0d4c7cef2663"
+}

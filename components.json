@@ -44,11 +44,11 @@
     },
     "ResponsiveLayout": {
       "path": "src/components/layout/ResponsiveLayout.tsx",
-      "description": "Newspaper gameplay shell with desktop map/hand columns and a visible scrolling mobile hand."
+      "description": "Desktop newspaper gameplay shell with map and hand columns; Index selects MobileBattleLayout below 1024 CSS pixels."
     },
     "EnhancedGameHand": {
       "path": "src/components/game/EnhancedGameHand.tsx",
-      "description": "Readable hand, independent discard controls after the play limit, horizontal card browsing and inline deployment status."
+      "description": "Shared inspection, deployment, discard and gesture handling, with desktop cards or compact mobile thumbnails."
     },
     "CardDetailOverlay": {
       "path": "src/components/game/CardDetailOverlay.tsx",
@@ -57,6 +57,14 @@
     "VictoryConditions": {
       "path": "src/components/game/VictoryConditions.tsx",
       "description": "Faction-aware victory targets with keyboard-operable disclosure and labelled progress bars."
+    },
+    "MobileBattleLayout": {
+      "path": "src/components/game/mobile/MobileBattleLayout.tsx",
+      "description": "Mobile battlefield with fixed score/hand/turn areas, map/state/history tabs, searchable ZONE targeting and accessible briefing/menu sheets."
+    },
+    "MobileHandCard": {
+      "path": "src/components/game/mobile/MobileHandCard.tsx",
+      "description": "Compact readable hand card with cost, effect, type, availability and original vector fallback; opens the shared full card inspector."
     }
   }
 }
