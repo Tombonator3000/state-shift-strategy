@@ -1,3 +1,4 @@
+import { requiresStateTarget } from '@/game/stateTargeting';
 // src/ai/policy.ts
 import { AI_PRESETS, type AiConfig, type Difficulty } from "./difficulty";
 import {
@@ -391,7 +392,7 @@ function legalActionsFor(state: GameState, rootPlayer: PlayerId = state.currentP
   const targetCandidates = collectZoneTargets(state, player.states);
 
   for (const card of player.hand ?? []) {
-    if (card.type === "ZONE") {
+    if (requiresStateTarget(card)) {
       for (const target of targetCandidates) {
         const key = `${card.id}:${target}`;
         if (seen.has(key)) continue;

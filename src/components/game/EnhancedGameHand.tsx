@@ -1,3 +1,4 @@
+import { requiresStateTarget } from '@/game/stateTargeting';
 import React, { useState, useRef, useMemo } from 'react';
 import clsx from 'clsx';
 import CardDetailOverlay from './CardDetailOverlay';
@@ -462,7 +463,7 @@ const EnhancedGameHand: React.FC<EnhancedGameHandProps> = ({
             }
 
             // Zone card targeting - direct activation
-            if (normalizeCardType(card.type) === 'ZONE') {
+            if (requiresStateTarget(card)) {
               audio.playSFX('click');
               triggerHaptic('medium');
               setExaminedCard(null);

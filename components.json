@@ -65,6 +65,22 @@
     "MobileHandCard": {
       "path": "src/components/game/mobile/MobileHandCard.tsx",
       "description": "Compact readable hand card with cost, effect, type, availability and original vector fallback; opens the shared full card inspector."
+    },
+    "StateTargetPicker": {
+      "path": "src/components/newsroom/StateTargetPicker.tsx",
+      "description": "Shared accessible pressure target search, map choice, cost/pressure preview and guarded confirmation."
+    },
+    "NewsroomSoundControl": {
+      "path": "src/components/newsroom/NewsroomSoundControl.tsx",
+      "description": "Persistent playback status, gesture retry, recording selection and master/music volume."
+    },
+    "RoundFrontPage": {
+      "path": "src/components/newsroom/RoundFrontPage.tsx",
+      "description": "Current-round newspaper with coherent story, original evidence artwork and actual card outcomes."
+    },
+    "PressDispatchTray": {
+      "path": "src/components/newsroom/PressDispatchTray.tsx",
+      "description": "Single queue of completed-play and combo clippings; persistent archive and reader."
     }
   }
 }

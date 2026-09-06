@@ -662,6 +662,12 @@ const EnhancedUSAMap: React.FC<EnhancedUSAMapProps> = ({
       
       pathElement.setAttribute('class', classes);
       pathElement.setAttribute('data-state-id', stateId);
+      pathElement.setAttribute('role', 'button');
+      pathElement.setAttribute('tabindex', '0');
+      pathElement.setAttribute('aria-label', `${gameState?.name ?? stateId}, ${gameState?.owner === 'player' ? 'your state' : `defense ${gameState?.defense ?? 0}`}`);
+      pathElement.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); if (!selectedZoneCard || gameState?.owner !== 'player') onStateClick(gameState?.abbreviation || stateId); }
+      });
       pathElement.setAttribute('data-state-abbr', gameState?.abbreviation || stateId);
       
       // Enhanced event listeners with better feedback

@@ -1,3 +1,4 @@
+import { requiresStateTarget } from '@/game/stateTargeting';
 declare const window: any;
 
 import { computeMediaTruthDelta_MVP, warnIfMediaScaling, type MediaResolutionOptions } from '@/mvp/media';
@@ -484,7 +485,7 @@ function applyMediaEffect(
   }
 }
 
-function computeZonePressureDelta(
+export function computeZonePressureDelta(
   state: GameState,
   owner: PlayerId,
   basePressureDelta: number,
@@ -544,6 +545,10 @@ export function applyEffectsMvp(
 
   if (card.type === 'HYBRID') {
     applyCardEffectsPayload(state, owner, card.effects as CardEffects, rng, card.name);
+    if (requiresStateTarget(card)) {
+      if (!targetStateId) throw new Error('Pressure card requires a target state');
+      applyZoneEffect(state, owner, { pressureDelta: computeZonePressureDelta(state, owner, (card.effects as CardEffects).pressureDelta ?? 0) }, targetStateId, rng);
+    }
     return state;
   }
 

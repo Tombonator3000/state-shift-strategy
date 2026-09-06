@@ -1,3 +1,4 @@
+import { requiresStateTarget } from '@/game/stateTargeting';
 import { AI_PRESETS, mergeBiasModifiers, type AiConfig, type BiasModifiers } from '@/ai/difficulty';
 import type { GameCard } from '@/rules/mvp';
 import { CARD_DATABASE } from './cardDatabase';
@@ -698,6 +699,7 @@ class LegacyAIStrategist {
   }
 
   public generateCardPlays(card: GameCard, gameState: any, evaluation: GameStateEvaluation): CardPlay[] {
+    if (requiresStateTarget(card)) return this.generateZonePlays(card, gameState, evaluation);
     const plays: CardPlay[] = [];
     
     switch (card.type) {

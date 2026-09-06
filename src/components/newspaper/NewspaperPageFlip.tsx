@@ -1,148 +1,36 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-
-interface NewspaperPageFlipProps {
-  pages: React.ReactNode[];
-  onPageChange?: (page: number) => void;
-  enableSound?: boolean;
-}
-
-export const NewspaperPageFlip = ({ pages, onPageChange, enableSound = true }: NewspaperPageFlipProps) => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
-
-  const playPageFlipSound = () => {
-    if (!enableSound) return;
-    
-    // Create a quick paper rustle sound effect
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 200;
-    oscillator.type = 'sawtooth';
-    
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.3);
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useAudioContext } from '@/contexts/AudioContext';
+interface NewspaperPageFlipProps { pages: React.ReactNode[]; onPageChange?: (page: number) => void; enableSound?: boolean }
+export function NewspaperPageFlip({ pages, onPageChange, enableSound = true }: NewspaperPageFlipProps) {
+  const [current, setCurrent] = useState(0);
+  const touch = useRef<{ x: number; y: number } | null>(null);
+  const reduceMotion = useReducedMotion();
+  const audio = useAudioContext();
+  const goTo = (index: number) => {
+    if (index < 0 || index >= pages.length || index === current) return;
+    setCurrent(index); onPageChange?.(index);
+    if (enableSound) void audio.playSFX('newspaper');
   };
-
-  const goToPage = (pageIndex: number) => {
-    if (pageIndex < 0 || pageIndex >= pages.length) return;
-    
-    setDirection(pageIndex > currentPage ? 'right' : 'left');
-    setCurrentPage(pageIndex);
-    onPageChange?.(pageIndex);
-    playPageFlipSound();
-  };
-
-  const nextPage = () => goToPage(currentPage + 1);
-  const prevPage = () => goToPage(currentPage - 1);
-
+  const goToRef = useRef(goTo); goToRef.current = goTo;
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') prevPage();
-      if (e.key === 'ArrowRight') nextPage();
+    const key = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || (event.target instanceof HTMLElement && event.target.closest('input,textarea,select,button,[contenteditable=true]'))) return;
+      if (event.key === 'ArrowLeft') { event.preventDefault(); goToRef.current(current - 1); }
+      if (event.key === 'ArrowRight') { event.preventDefault(); goToRef.current(current + 1); }
     };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentPage]);
-
-  const pageVariants = {
-    enter: (direction: 'left' | 'right') => ({
-      rotateY: direction === 'right' ? 90 : -90,
-      opacity: 0,
-      transformOrigin: direction === 'right' ? 'left' : 'right',
-    }),
-    center: {
-      rotateY: 0,
-      opacity: 1,
-      transformOrigin: 'center',
-    },
-    exit: (direction: 'left' | 'right') => ({
-      rotateY: direction === 'right' ? -90 : 90,
-      opacity: 0,
-      transformOrigin: direction === 'right' ? 'right' : 'left',
-    }),
-  };
-
-  return (
-    <div className="relative w-full h-full perspective-1000">
-      <AnimatePresence initial={false} custom={direction} mode="wait">
-        <motion.div
-          key={currentPage}
-          custom={direction}
-          variants={pageVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{
-            rotateY: { type: 'spring', stiffness: 100, damping: 20 },
-            opacity: { duration: 0.3 },
-          }}
-          className="w-full h-full"
-          style={{
-            transformStyle: 'preserve-3d',
-          }}
-        >
-          {pages[currentPage]}
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Page Navigation */}
-      <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 sm:gap-4 z-10 w-[calc(100%-1rem)] sm:w-auto justify-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={prevPage}
-          disabled={currentPage === 0}
-          className="bg-background/90 backdrop-blur px-2 sm:px-3"
-        >
-          <ChevronLeft className="w-4 h-4 sm:mr-1" />
-          <span className="hidden sm:inline">Previous</span>
-        </Button>
-
-        <div className="flex gap-1.5 sm:gap-2">
-          {pages.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToPage(index)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all",
-                index === currentPage
-                  ? "bg-foreground w-6 sm:w-8"
-                  : "bg-foreground/30 hover:bg-foreground/60"
-              )}
-              aria-label={`Go to page ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={nextPage}
-          disabled={currentPage === pages.length - 1}
-          className="bg-background/90 backdrop-blur px-2 sm:px-3"
-        >
-          <span className="hidden sm:inline">Next</span>
-          <ChevronRight className="w-4 h-4 sm:ml-1" />
-        </Button>
-      </div>
-
-      {/* Page Number */}
-      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 text-xs sm:text-sm font-mono text-muted-foreground">
-        Page {currentPage + 1} of {pages.length}
-      </div>
+    window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key);
+  }, [current]);
+  return <div className="press-page-reader">
+    <div className="press-page-scroll" onTouchStart={event => { touch.current = { x: event.touches[0].clientX, y: event.touches[0].clientY }; }} onTouchCancel={() => { touch.current = null; }} onTouchEnd={event => {
+      if (!touch.current) return;
+      const dx = event.changedTouches[0].clientX - touch.current.x;
+      const dy = event.changedTouches[0].clientY - touch.current.y;
+      touch.current = null;
+      if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 2) goTo(current + (dx < 0 ? 1 : -1));
+    }}>
+      <AnimatePresence mode="wait" initial={false}><motion.div key={current} initial={{ opacity: reduceMotion ? 1 : 0 }} animate={{ opacity: 1 }} exit={{ opacity: reduceMotion ? 1 : 0 }} transition={{ duration: reduceMotion ? 0 : .14 }}>{pages[current]}</motion.div></AnimatePresence>
     </div>
-  );
-};
+    <nav className="press-page-nav" aria-label="Newspaper pages"><button type="button" disabled={!current} onClick={() => goTo(current - 1)}>← Previous</button><label><span className="sr-only">Newspaper page</span><select value={current} onChange={e => goTo(Number(e.target.value))}>{pages.map((_, index) => <option key={index} value={index}>Page {index + 1} of {pages.length}</option>)}</select></label><button type="button" disabled={current === pages.length - 1} onClick={() => goTo(current + 1)}>Next →</button></nav>
+  </div>;
+}

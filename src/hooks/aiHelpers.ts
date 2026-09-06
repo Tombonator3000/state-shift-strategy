@@ -1,3 +1,4 @@
+import { requiresStateTarget, validStateTarget } from '@/game/stateTargeting';
 import { emitBanter, defaultBanterUi, getCardPlayTrigger } from '@/ai/banter/banterEngine';
 import type { TurnPlay } from '@/game/combo.types';
 import { trackCharacterAppearance, type RecurringCharacterState } from '@/game/recurringCharacters';
@@ -402,33 +403,8 @@ export const applyAiCardPlay = (
     };
   }
 
-  if (resolvedCard.type === 'ZONE') {
-    const trimmedTarget = typeof targetState === 'string' ? targetState.trim() : '';
-    const normalizedTarget = trimmedTarget.toLowerCase();
-    const hasValidTarget =
-      trimmedTarget.length > 0 &&
-      prev.states.some(candidate => {
-        const identifiers = [candidate.id, candidate.abbreviation, candidate.name]
-          .filter(Boolean)
-          .map(value => value.trim().toLowerCase());
-        return identifiers.includes(normalizedTarget);
-      });
-
-    if (!hasValidTarget) {
-      const explanation = trimmedTarget.length
-        ? `but the target state "${trimmedTarget}" could not be resolved.`
-        : 'but no target state was provided.';
-      return {
-        nextState: {
-          ...prev,
-          log: [
-            ...prev.log,
-            `AI attempted to deploy zone card "${resolvedCard.name}" ${explanation}`,
-          ],
-        },
-        failed: true,
-      };
-    }
+  if (requiresStateTarget(resolvedCard) && !validStateTarget(prev.states, targetState, 'ai')) {
+    return { nextState: { ...prev, log: [...prev.log, `AI could not deploy ${resolvedCard.name}: select an unclaimed or opposing state.`] }, failed: true };
   }
 
   const cardTags = Array.isArray((resolvedCard as { tags?: string[] }).tags)

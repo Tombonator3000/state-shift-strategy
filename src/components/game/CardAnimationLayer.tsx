@@ -378,10 +378,10 @@ const CardAnimationLayer: React.FC<CardAnimationLayerProps> = ({ children }) => 
     };
 
     // Register event listeners
-    window.addEventListener('synergyActivation', handleSynergyActivation as EventListener);
+    // Completed-play and combo clippings are coordinated by PressDispatchTray.
     window.addEventListener('showFloatingNumber', handleFloatingNumber as EventListener);
-    window.addEventListener('governmentRedaction', handleGovernmentRedaction as EventListener);
-    window.addEventListener('truthFlash', handleTruthFlash as EventListener);
+
+
     window.addEventListener('truthMeltdownBroadcast', handleTruthMeltdownBroadcast as EventListener);
     window.addEventListener('cryptidSighting', handleCryptidSighting as EventListener);
     window.addEventListener('paranormalHotspot', handleParanormalHotspot as EventListener);

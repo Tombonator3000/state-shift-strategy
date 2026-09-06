@@ -30,7 +30,7 @@ const CardCollectionTabloid = ({ open, onOpenChange }: CardCollectionTabloidProp
   // Filter cards based on search and filters
   const filteredCards = discoveredCards.filter(card => {
     const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         card.text.toLowerCase().includes(searchTerm.toLowerCase());
+                         (card.text ?? '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === 'all' || normalizeCardType(card.type) === filterType;
     const matchesRarity = filterRarity === 'all' || card.rarity === filterRarity;
 

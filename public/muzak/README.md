@@ -1,57 +1,18 @@
-# Music Files for Shadow Government Game
+# Paranoid Times recordings
 
-This directory contains the dynamic background music system for the game.
+The game uses the original recordings, loaded on demand by `src/audio/NewsroomRadio.ts`.
+Paths are resolved relative to Vite's deployment base (Lovable `/`, GitHub Pages `/state-shift-strategy/`).
 
-## File Structure
+- Menu: `Theme-2.mp3`.
+- Government: `Government-1.mp3` through `Government-5.mp3`.
+- Truth: `Truth-1.mp3` through `Truth-5.mp3`.
+- Credits: `endcredits-theme.mp3`.
 
-### Theme Music (Menu/Neutral)
-- `Theme-1.mp3` - Main theme track 1
-- `Theme-2.mp3` - Main theme track 2
+`Theme-1.mp3` contains only two CR/LF bytes, including in the available Git history.
+It is preserved but excluded from the playlist. Do not claim it has been recovered.
+Twelve other tracks pass the media probe recorded in `docs/qa/tabloid-2026-09-06/audio-audit.json`.
 
-### Government Faction Music
-- `Government-1.mp3` - Deep State track 1
-- `Government-2.mp3` - Deep State track 2
-- `Government-3.mp3` - Deep State track 3
-- `Government-4.mp3` - Deep State track 4
-- `Government-5.mp3` - Deep State track 5
-
-### Truth Seekers Faction Music
-- `Truth-1.mp3` - Truth Seekers track 1
-- `Truth-2.mp3` - Truth Seekers track 2
-- `Truth-3.mp3` - Truth Seekers track 3
-- `Truth-4.mp3` - Truth Seekers track 4
-- `Truth-5.mp3` - Truth Seekers track 5
-
-## How It Works
-
-1. **Start Screen**: Plays theme music (Theme-*.mp3) on loop
-2. **Faction Selection**: When hovering/selecting a faction, fades to that faction's music
-3. **Gameplay**: Alternates between faction music and theme music for variety
-4. **Transitions**: All music changes use smooth fade-in/fade-out (2 second crossfade)
-
-## Audio Format Requirements
-
-- MP3 format for web compatibility
-- 44.1kHz sample rate recommended
-- Stereo or mono acceptable
-- Keep file sizes reasonable (< 5MB each)
-- Normalize volume levels across all tracks
-- No silence at beginning/end for smooth looping
-
-## Thematic Guidelines
-
-### Theme Music
-- Atmospheric, conspiracy-themed
-- Neutral mood - works for both factions
-- Mysterious, government intrigue feeling
-
-### Government Music  
-- Authoritative, powerful
-- Corporate/establishment feel
-- Orchestral or electronic elements
-
-### Truth Seekers Music
-- Alternative, underground vibe
-- Rebellious, investigative mood
-- Rock, electronic, or folk elements
-
+Start/resume requires a player gesture when the browser blocks autoplay. Pause remains paused across scenes.
+Unavailable recordings are skipped within a bounded playlist; errors remain visible with a retry action.
+Music streams without Cache Storage. The browser may still use its ordinary HTTP cache.
+The old crossfade preference is retained for save compatibility; transitions currently switch tracks directly.

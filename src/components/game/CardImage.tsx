@@ -12,6 +12,7 @@ interface CardImageProps {
 }
 
 const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'cover', fallback }) => {
+  const [fallbackFailed, setFallbackFailed] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageExtension, setImageExtension] = useState<'jpg' | 'png'>('jpg');
@@ -64,13 +65,12 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
     setCanLoadDirect(hasArt);
     setImageError(!hasArt);
     setImageLoaded(false);
+    setFallbackFailed(false);
     setImageExtension('jpg');
   }, [cardId]);
 
   const handleImageError = () => {
-    if (!canLoadDirect) {
-      return;
-    }
+    if (!canLoadDirect || imageError) { setFallbackFailed(true); return; }
 
     setImageLoaded(false);
 
@@ -110,6 +110,8 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
     return <div className={containerClassName}>{fallback}</div>;
   }
 
+  if (fallbackFailed) return <div className={containerClassName}>{fallback ?? <div className="press-art-fallback" role="img" aria-label={`Image unavailable for ${cardId}`}><strong>PHOTO<br />WITHHELD</strong><small>{cardId}</small></div>}</div>;
+
   return (
     <div className={containerClassName}>
       {!imageLoaded && (
@@ -120,6 +122,8 @@ const CardImage: React.FC<CardImageProps> = ({ cardId, className = '', fit = 'co
 
       <img
         src={imagePath}
+        loading="lazy"
+        decoding="async"
         alt={`Card art for ${cardId}`}
         className={imageClassName}
         onLoad={handleImageLoad}
