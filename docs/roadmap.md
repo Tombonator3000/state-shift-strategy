@@ -8,6 +8,28 @@ Oppstarts- og katalogrettelsene er merget i [PR #802](https://github.com/Tombona
 2026-09-06T00:35:43Z. PR-kontrollene for typer/tester/bygg og Pages-publiseringen består.
 Lint/dekning og ekte nettleserreise har fortsatt statusen som er beskrevet nedenfor.
 
+## Neste leveranser: fungerende kort/lyd og samlet tabloidstil
+
+Tom har meldt at pressure-kort og musikk må fungere på mobil og PC, og ønsker
+et tydelig avisuttrykk i hele spillet, nye artikler fra rundens kort og bedre
+Breaking/Redacted/komboer. **Dette er en arbeidsordre, ikke ferdige rettelser.**
+Seks separate grafikkforslag er laget. Full todo, kildesjekk, designkrav og
+verifisering finnes i [TABLOID_TODO.md](design/tabloid-2026-09-06/TABLOID_TODO.md).
+
+| Rekkefølge | Oppgaver | Leveranse |
+| --- | --- | --- |
+| 1 – P0 | T01–T02 | Reproduser gjenværende pressure-feil, rett hele kort→mål→resultat-flyten og gi mobil/PC samme målvelger med forhåndsvisning og bekreftelse. |
+| 2 – P0 | T03–T04 | Rett lydadresser, håndter Theme-1 som bare er 2 byte, og gjør lydstart/volum/sporbytte og feilstatus pålitelige. |
+| 3 – P1 | T05–T06 | Én avklart avisflyt fra faktisk runde; sammenhengende, varierte artikler bygget fra kortene og deres utfall. |
+| 4 – P1 | T07–T08 | Samlet tabloidstil i spill/menyer/kort og en lesbar avis mellom rundene. |
+| 5 – P1 | T09–T12 | Breaking, Redacted, kombo og effektkø med tydelig belønning, lukking og varig hendelseslogg. |
+| 6 – P2 | T13–T14 | Ressurser, fysisk mobilkontroll og målt ytelse; sammenlign faktisk bygg med konseptene. |
+
+Ingen nye produktrettelser eller lyd-/fps-godkjenninger inngår i denne planrunden.
+Pressure-feilens eksakte årsak er fortsatt uavklart; én tidligere vellykket
+ZONE-reise godkjenner ikke alle kort. De eldre P0-kontrollene nedenfor gjelder
+fortsatt og tas inn i akseptansen for hver leveranse.
+
 ## Mobilredesign — 2026-09-06
 
 Brukeren bekrefter at mobilspillet fungerer, men at layouten er vanskelig å bruke.

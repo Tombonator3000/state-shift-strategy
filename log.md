@@ -1,3 +1,27 @@
+# 2026-09-06T08:57:16Z — Tabloidarbeidsliste og seks grafikkforslag
+
+Brukeren ber om en todo og grafikkeksempler: pressure på mobil/PC, eksisterende
+musikk, Breaking/Redacted, sammenhengende artikler fra kort og bedre komboer.
+14 oppgaver med akseptanse er prioritert. Seks separate konsepter er laget og
+visuelt vurdert. USA-setting og standardseiersmål ble korrigert i eksemplene.
+
+Bekreftet i kilden: lydadresser mangler Pages-basen; Theme-1.mp3 er kun CR/LF
+(2 byte); avisens synlige composite-bane og separate artikkelgeneratorer må
+avklares før konsolidering. Gjenværende pressure-feil er ikke reprodusert her.
+Artikkelbank og humormal er lest; eksempelteksten er et forslag, ingen ny regel.
+
+Endrede filer: `docs/roadmap.md`, `log.md`,
+`docs/design/tabloid-2026-09-06/TABLOID_TODO.md`,
+`docs/design/tabloid-2026-09-06/CONCEPT_PROMPTS.json`,
+`docs/design/tabloid-2026-09-06/source-audit.json`.
+
+Bare dokumentasjon og konsepter; ingen spillkode eller musikk er reparert i denne
+runden. Ingen nye lyd-, nettleser- eller fps-tester er påstått. Tidligere 175
+beståtte tester tilhører forrige implementasjon. Eksisterende testede kildehasher
+kontrollert uendret. Fullført oppdrag her er arbeidsgrunnlaget, ikke T01–T14.
+
+---
+
 # 2026-09-06T03:46:00Z — Mobilredesign merget og publisert, sluttstatus dokumentert
 
 PR #805 ble merget 2026-09-06T03:41:15Z (`08f4ba7fcc4e4ae96f6e22a5d6f50bf80f28be21`).

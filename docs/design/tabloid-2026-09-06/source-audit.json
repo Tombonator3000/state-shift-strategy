@@ -1,0 +1,81 @@
+{
+  "date": "2026-09-06",
+  "base": "d05843dbee84d0bb9f84e809ab53c31595d5cd80",
+  "scope": "Source audit and design concepts only",
+  "findings": [
+    {
+      "id": "A01",
+      "status": "confirmed_source",
+      "files": [
+        "src/hooks/useAudio.ts",
+        "vite.config.ts",
+        "src/lib/assets.ts"
+      ],
+      "finding": "Root-relative music paths assigned directly to Audio.src while Pages deploys under /state-shift-strategy/."
+    },
+    {
+      "id": "A02",
+      "status": "confirmed_file",
+      "file": "public/muzak/Theme-1.mp3",
+      "bytes": 2,
+      "contents": "CRLF only",
+      "finding": "Not a music recording."
+    },
+    {
+      "id": "A03",
+      "status": "confirmed_source",
+      "files": [
+        "src/hooks/useAudio.ts",
+        "src/assets/audio/sfxManifest.ts"
+      ],
+      "finding": "Ready status can be reported after individual load failures; SFX have root-relative paths too."
+    },
+    {
+      "id": "A04",
+      "status": "unreproduced_user_report",
+      "files": [
+        "src/pages/Index.tsx",
+        "src/components/game/EnhancedGameHand.tsx",
+        "src/components/game/EnhancedUSAMap.tsx"
+      ],
+      "finding": "Target selection currently relies on ZONE type. Remaining pressure bug needs actual failing card and input-path reproduction; no universal failure claimed."
+    },
+    {
+      "id": "A05",
+      "status": "confirmed_source",
+      "files": [
+        "src/components/game/TabloidNewspaperV2.tsx",
+        "src/engine/news/composeTriple.ts",
+        "src/engine/newspaper/IssueGenerator.ts",
+        "src/engine/newspaper/ArticleCombiner.ts"
+      ],
+      "finding": "Multiple article composition paths; rendered V2 uses latest composite feed entry. AI ArticleCombiner has separate dev-demo consumer."
+    },
+    {
+      "id": "A06",
+      "status": "confirmed_source",
+      "file": "src/game/twoCardCombos.ts",
+      "combo": "pair_bigfoot_mothman",
+      "baseReward": {
+        "ip": 1,
+        "truth": 1
+      }
+    }
+  ],
+  "limitations": [
+    "No new browser reproduction",
+    "No audio playback validation",
+    "No performance measurements",
+    "Concept pixels and background text are not production rules or map geometry"
+  ],
+  "references": [
+    {
+      "title": "Project humor guide",
+      "path": "Humor Template  – Paranoid Times.md"
+    },
+    {
+      "title": "Autoplay guide for media and Web Audio APIs",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay"
+    }
+  ]
+}
