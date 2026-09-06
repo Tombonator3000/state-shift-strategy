@@ -17,7 +17,8 @@ får tydeligere grafikk og handlingsresultatene står igjen over hånden. Hjelp 
 opplæring er tilpasset. 174 tester består; typer/bygg består; lint 410/51 uendret.
 PR #803 er merget og publisert. ZONE → AI → avis → ny tur er gjennomført i nettleser.
 Visuell kontroll fant kortskalering/fanekollisjon; rettelsen er klar med 175 tester.
-Siste størrelseskontroll av oppfølgingen gjenstår.
+PR #804 bekrefter 132×177-kort og grid-faner. Siste rettelse skjuler inaktive
+faner helt, slik at kartet får hele området sitt; sluttkontroll gjenstår.
 [Design og verifikasjon](analysis/mobile-newsroom-2026-09-06/README.md).
 Neste praktiske kontroll: én kamp med én hånd på brukerens telefon, inkludert
 nettleserens adressefelt/sikre marger og de eksisterende effektenes ytelse.

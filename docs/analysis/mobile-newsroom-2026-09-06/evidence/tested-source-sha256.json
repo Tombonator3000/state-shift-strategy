@@ -11,5 +11,5 @@
   "src/components/game/mobile/MobileHandCard.tsx": "3f88233bef331bc9064ba7be65abf96510f8746b19208e7418bbecc1af3a6d12",
   "src/hooks/use-mobile.tsx": "f348db0e503790bc8955a4e39b7f488f112b622137dd91e89af18e4b042ddaa8",
   "src/pages/Index.tsx": "1c4587c6b8b153c4ee7bf56f37390a1b08a8f0e1a77fca5ecb73e677f65c4e52",
-  "src/styles/mobile-battle.css": "8a42a27cc2ce27c01bba9794564ad34e1f99e8c1793a8dd2dc6fdac43607ae56"
+  "src/styles/mobile-battle.css": "4f8a0a357a3650086b9c4b34b32a2eb555ae50e2a79170e822206d14da514b57"
 }

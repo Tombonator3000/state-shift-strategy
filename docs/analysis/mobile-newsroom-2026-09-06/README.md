@@ -73,7 +73,12 @@ returned control to the player.
 Visual review caught two genuine defects that component tests cannot detect:
 legacy CSS scaled compact cards to 85%, and shared tab utilities overrode the
 three-column tab bar. The follow-up scopes these styles and improves the receipt
-for attacks and ZONE targets. Its final geometry check awaits deployment.
+for attacks and ZONE targets. PR #804 was merged at 2026-09-06T03:32:49Z (`9d4147b`) and deployed.
+After one reload, the final stylesheet loaded: cards measured 132 × 177 with no
+scale transform, and the tab bar measured 44px high with grid layout. Menu and
+Game settings opened. The retained inactive States wrapper still consumed half
+the map panel: the final patch explicitly removes hidden tab panels from layout.
+Its final viewport inspection is pending deployment.
 Screenshots were inspected directly; downloadable screenshot synchronization was
 unavailable, so there are no archived image files claimed as evidence.
 

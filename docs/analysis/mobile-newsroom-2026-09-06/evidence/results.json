@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-09-06T03:30:01Z",
+  "recordedAt": "2026-09-06T03:38:58Z",
   "base": "268be5ac0d9fadaf7578b082e2a3bda2afaa9ec4",
   "checks": [
     {
@@ -64,6 +64,34 @@
       "seconds": 12.87,
       "exitCode": 0,
       "log": "visual-typecheck.log"
+    },
+    {
+      "command": "npm run build",
+      "startedAt": "2026-09-06T03:36:57.463712+00:00",
+      "seconds": 14.42,
+      "exitCode": 0,
+      "log": "panels-build-pages.log"
+    },
+    {
+      "command": "npm exec --yes --package=bun@1.4.2 -- bun test --coverage --coverage-reporter=text",
+      "startedAt": "2026-09-06T03:36:57.463713+00:00",
+      "seconds": 14.08,
+      "exitCode": 1,
+      "log": "panels-coverage.log"
+    },
+    {
+      "command": "npm run lint",
+      "startedAt": "2026-09-06T03:36:57.452055+00:00",
+      "seconds": 6.61,
+      "exitCode": 1,
+      "log": "panels-lint.log"
+    },
+    {
+      "command": "npm run typecheck",
+      "startedAt": "2026-09-06T03:36:57.458421+00:00",
+      "seconds": 13.22,
+      "exitCode": 0,
+      "log": "panels-typecheck.log"
     }
   ],
   "tests": {
@@ -87,7 +115,8 @@
     "baseline": "desktop observed 1363x936",
     "newLayout": "PR803 portrait layout observed; CSS scale/cascade defects found and repaired in follow-up, pending new deployment",
     "physicalDevicePerformance": "unmeasured",
-    "journey": "ZONE selected through inspector, Texas targeted, hand/IP/plays updated, AI completed three plays, newspaper opened and was continued"
+    "journey": "ZONE selected through inspector, Texas targeted, hand/IP/plays updated, AI completed three plays, newspaper opened and was continued",
+    "followup": "After reload, CSS index-CJjU2Zny.css loaded: card 132x177 with transform none; tabs grid 44px high. Menu and Game settings opened. Inactive States wrapper still consumed map space; final CSS correction pending deploy."
   },
   "github": {
     "pr": 803,
@@ -98,6 +127,16 @@
     "appChecks": "success",
     "debtJob": "failure",
     "pagesRun": 34008855526,
+    "pages": "success"
+  },
+  "followup": {
+    "pr": 804,
+    "source": "d6c80020ea5f2501d90651ff60e6c46240d4976f",
+    "merge": "9d4147b887a786593b300db4998bc83ab0b224ca",
+    "mergedAt": "2026-09-06T03:32:49Z",
+    "ciRun": 34009204812,
+    "appChecks": "success",
+    "pagesRun": 34009263729,
     "pages": "success"
   }
 }
