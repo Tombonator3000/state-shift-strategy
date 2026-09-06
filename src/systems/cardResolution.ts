@@ -1,4 +1,5 @@
-import { applyEffectsMvp, type PlayerId } from '@/engine/applyEffects-mvp';
+import { requiresStateTarget, validStateTarget } from '@/game/stateTargeting';
+import { applyEffectsMvp, computeZonePressureDelta, type PlayerId } from '@/engine/applyEffects-mvp';
 import { auditGameState } from '@/mvp/gameStateAudit';
 import type { MediaResolutionOptions } from '@/mvp/media';
 import { cloneGameState, type Card, type GameState as EngineGameState } from '@/mvp';
@@ -521,6 +522,7 @@ export function resolveCardMVP(
   achievements: AchievementTracker = defaultAchievementTracker,
   mediaOptions: MediaResolutionOptions = {},
 ): CardPlayResolution {
+  if (requiresStateTarget(card) && !validStateTarget(gameState.states, targetState, actor)) throw new Error('Choose a valid unclaimed or rival state.');
   const counterOutcome = detectCounterOutcome(gameState, card);
   if (counterOutcome.countered) {
     const baseStates = gameState.states.map(state => ({ ...state }));
@@ -849,3 +851,9 @@ export const recordParanormalHotspotResolution = (
   ]);
 };
 
+
+/** Pure quote: uses the same editor calculation as resolution, without effects, RNG or rewards. */
+export function quoteZonePressure(snapshot: GameSnapshot, card: GameCard): number {
+  if (!requiresStateTarget(card)) return 0;
+  return computeZonePressureDelta(toEngineState(snapshot, []), PLAYER_ID, card.effects?.pressureDelta ?? 0);
+}

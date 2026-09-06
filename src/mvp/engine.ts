@@ -1,3 +1,4 @@
+import { requiresStateTarget } from '@/game/stateTargeting';
 import { evaluateStandardVictory } from '@/game/victoryRules';
 declare const window: any;
 
@@ -542,7 +543,8 @@ export function canPlay(
     return { ok: false, reason: 'insufficient-ip' };
   }
 
-  if (card.type === 'ZONE') {
+  if (requiresStateTarget(card)) {
+    if (targetStateId && player.states.includes(targetStateId)) return { ok: false, reason: 'owned-target' };
     if (!targetStateId) {
       return { ok: false, reason: 'missing-target' };
     }

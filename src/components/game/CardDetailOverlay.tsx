@@ -1,3 +1,4 @@
+import { requiresStateTarget } from '@/game/stateTargeting';
 import React, { useRef } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
@@ -97,7 +98,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
                   <p>{flavor}</p>
                 </section>
               )}
-              {type === 'ZONE' && <p className="card-inspector-hint">Choose an unowned or rival state after selecting this card.</p>}
+              {requiresStateTarget(card) && <p className="card-inspector-hint">Choose an unowned or rival state after selecting this card.</p>}
             </div>
           </div>
 
@@ -109,7 +110,7 @@ const CardDetailOverlay: React.FC<CardDetailOverlayProps> = ({
             <div className="card-inspector-actions">
               <Button type="button" onClick={onPlayCard} disabled={disabled || !canAfford} className="card-inspector-deploy">
                 <ActionIcon aria-hidden="true" className="h-4 w-4" />
-                {type === 'ZONE' ? 'Select & target' : 'Deploy asset'}
+                {requiresStateTarget(card) ? 'Select & target' : 'Deploy asset'}
               </Button>
               {onToggleDiscard && (
                 <Button type="button" variant="outline" onClick={onToggleDiscard} disabled={!discardEnabled} aria-pressed={isDiscardQueued} className="card-inspector-discard">

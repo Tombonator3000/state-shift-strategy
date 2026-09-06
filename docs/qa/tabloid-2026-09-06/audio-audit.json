@@ -1,0 +1,80 @@
+[
+  {
+    "path": "public/muzak/Truth-5.mp3",
+    "bytes": 2787320,
+    "valid": true,
+    "duration": "125.712000"
+  },
+  {
+    "path": "public/muzak/Government-4.mp3",
+    "bytes": 5042807,
+    "valid": true,
+    "duration": "210.240000"
+  },
+  {
+    "path": "public/muzak/Truth-2.mp3",
+    "bytes": 4054443,
+    "valid": true,
+    "duration": "157.704000"
+  },
+  {
+    "path": "public/muzak/endcredits-theme.mp3",
+    "bytes": 5093446,
+    "valid": true,
+    "duration": "230.112000"
+  },
+  {
+    "path": "public/muzak/Government-3.mp3",
+    "bytes": 2216066,
+    "valid": true,
+    "duration": "96.240000"
+  },
+  {
+    "path": "public/muzak/Truth-3.mp3",
+    "bytes": 1904078,
+    "valid": true,
+    "duration": "77.064000"
+  },
+  {
+    "path": "public/muzak/Government-1.mp3",
+    "bytes": 3640895,
+    "valid": true,
+    "duration": "157.560000"
+  },
+  {
+    "path": "public/muzak/Truth-4.mp3",
+    "bytes": 2366589,
+    "valid": true,
+    "duration": "104.184000"
+  },
+  {
+    "path": "public/muzak/Theme-2.mp3",
+    "bytes": 3110369,
+    "valid": true,
+    "duration": "139.824000"
+  },
+  {
+    "path": "public/muzak/Government-2.mp3",
+    "bytes": 6489463,
+    "valid": true,
+    "duration": "297.240000"
+  },
+  {
+    "path": "public/muzak/Government-5.mp3",
+    "bytes": 3613072,
+    "valid": true,
+    "duration": "157.392000"
+  },
+  {
+    "path": "public/muzak/Truth-1.mp3",
+    "bytes": 8825090,
+    "valid": true,
+    "duration": "380.184000"
+  },
+  {
+    "path": "public/muzak/Theme-1.mp3",
+    "bytes": 2,
+    "valid": false,
+    "duration": null
+  }
+]

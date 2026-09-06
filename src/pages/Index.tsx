@@ -1,3 +1,8 @@
+import { PressDispatchTray } from '@/components/newsroom/PressDispatchTray';
+import { StateTargetPicker } from '@/components/newsroom/StateTargetPicker';
+import { NewsroomSoundControl } from '@/components/newsroom/NewsroomSoundControl';
+import { requiresStateTarget, validStateTarget } from '@/game/stateTargeting';
+import { quoteHumanCard } from '@/systems/cardPlayQuote';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
@@ -2222,54 +2227,27 @@ const Index = () => {
     return player?.name ?? 'Unknown';
   }, [isOnlineGame, onlineLobbyData, gameState.currentPlayer]);
 
-  const handleZoneCardSelect = (cardId: string) => {
-    const card = gameState.hand.find(c => c.id === cardId);
-    if (card?.type === 'ZONE') {
-      selectCard(cardId);
-      audio.playSFX('click');
-    }
-  };
+  const [targetPickerOpen, setTargetPickerOpen] = useState(false);
 
-  const handleStateClick = async (stateId: string) => {
-    if (gameState.selectedCard && !isAnimating()) {
-      const card = gameState.hand.find(c => c.id === gameState.selectedCard);
-      if (card?.type === 'ZONE') {
-        const targetState = gameState.states.find(s => s.abbreviation === stateId || s.id === stateId);
-        
-        // Validate target - cannot target own states with zone cards
-        if (targetState?.owner === 'player') {
-          toast.error('🚫 Cannot target your own states with zone cards!', {
-            duration: 3000,
-            style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
-          });
-          audio.playSFX('error');
-          return;
-        }
-        
-        selectTargetState(stateId); // keep state in store for logs/UX
-        audio.playSFX('click');
-        toast.success(`🎯 Targeting ${targetState?.name}! Deploying zone card...`, {
-          duration: 2000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #10b981' }
-        });
-        
-        // Play immediately with explicit target (no extra clicks)
-        setLoadingCard(gameState.selectedCard);
-        await handlePlayCard(gameState.selectedCard, stateId);
-      }
-    } else {
-      audio.playSFX('hover');
-    }
+  const handleStateClick = (stateId: string) => {
+    const card = gameState.hand.find(c => c.id === gameState.selectedCard);
+    if (!card || !requiresStateTarget(card) || !isHumanActionWindow(gameState) || loadingCard) return;
+    const target = validStateTarget(gameState.states, stateId);
+    if (!target) { toast.error('Choose an unclaimed or rival state.'); return; }
+    selectTargetState(target.id);
+    setTargetPickerOpen(true);
+    audio.playSFX('click');
   };
 
   const handleSelectCard = (cardId: string) => {
     if (!isHumanActionWindow(gameState) || gameState.cardsPlayedThisTurn >= 3) return;
     selectTargetState(null);
     selectCard(cardId);
+    setTargetPickerOpen(true);
     audio.playSFX('hover');
   };
 
-  const handlePlayCard = async (cardId: string, targetStateArg?: string) => {
+  const handlePlayCard = async (cardId: string, targetStateArg?: string, confirmedTarget = false) => {
     const card = gameState.hand.find(c => c.id === cardId);
     if (!card || isAnimating() || loadingCard || isEndingTurn || !isHumanActionWindow(gameState)) return;
 
@@ -2278,8 +2256,9 @@ const Index = () => {
     }
 
     // Check if player can afford the card
-    if (gameState.ip < card.cost) {
-      toast.error(`💰 Insufficient IP! Need ${card.cost}, have ${gameState.ip}`, {
+    const quote = quoteHumanCard(gameState, card);
+    if (gameState.ip < quote.cost) {
+      toast.error(`💰 Insufficient IP! Need ${quote.cost}, have ${gameState.ip}`, {
         duration: 3000,
         style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #ef4444' }
       });
@@ -2297,80 +2276,17 @@ const Index = () => {
       return;
     }
 
-    // If it's a ZONE card that requires targeting
-    if (card.type === 'ZONE' && !gameState.targetState && !targetStateArg) {
-      handleSelectCard(cardId);
-      audio.playSFX('hover');
-      toast('🎯 Zone card selected - click a state to target it!', {
-        duration: 4000,
-        style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
-      });
-
-      if (card.faction === 'government') {
-        const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
-        const position = cardElement
-          ? VisualEffectsCoordinator.getElementCenter(cardElement)
-          : VisualEffectsCoordinator.getScreenCenter();
-
-        VisualEffectsCoordinator.triggerGovernmentZoneTarget({
-          active: true,
-          x: position.x,
-          y: position.y,
-          cardId: card.id,
-          cardName: card.name,
-          mode: 'select'
-        });
-      }
-      return;
-    }
-
-    let resolvedTargetStateId: string | undefined = targetStateArg ?? gameState.targetState ?? undefined;
-
-    if (card.type === 'ZONE') {
-      const states = Array.isArray(gameState.states) ? gameState.states : [];
-      const findStateMatch = (identifier?: string | null) => {
-        if (!identifier) return null;
-        const trimmed = identifier.trim();
-        if (!trimmed) return null;
-        const normalized = trimmed.toLowerCase();
-
-        const matchedState = states.find(state => {
-          const abbreviation = typeof state.abbreviation === 'string' ? state.abbreviation.toLowerCase() : undefined;
-          const id = typeof state.id === 'string' ? state.id.toLowerCase() : undefined;
-          const name = typeof state.name === 'string' ? state.name.toLowerCase() : undefined;
-          return abbreviation === normalized || id === normalized || name === normalized;
-        });
-
-        if (!matchedState) {
-          return null;
-        }
-
-        const canonicalId =
-          (typeof matchedState.id === 'string' && matchedState.id) ||
-          (typeof matchedState.abbreviation === 'string' && matchedState.abbreviation) ||
-          (typeof matchedState.name === 'string' && matchedState.name) ||
-          trimmed;
-
-        return { canonicalId };
-      };
-
-      const resolvedMatch = findStateMatch(targetStateArg) ?? findStateMatch(gameState.targetState);
-
-      if (!resolvedMatch) {
-        selectTargetState(null);
-        setLoadingCard(null);
-        if (gameState.selectedCard !== cardId) {
-          selectCard(cardId);
-        }
-        audio.playSFX('error');
-        toast('🎯 Select a valid state target before deploying this zone card!', {
-          duration: 4000,
-          style: { background: '#1f2937', color: '#f3f4f6', border: '1px solid #eab308' }
-        });
+    let resolvedTargetStateId: string | undefined;
+    if (requiresStateTarget(card)) {
+      const target = validStateTarget(gameState.states, targetStateArg ?? gameState.targetState);
+      if (!confirmedTarget || !target) {
+        selectCard(cardId);
+        selectTargetState(target?.id ?? null);
+        setTargetPickerOpen(true);
         return;
       }
-
-      resolvedTargetStateId = resolvedMatch.canonicalId;
+      resolvedTargetStateId = target.id;
+      setTargetPickerOpen(false);
     }
 
     // Show loading state
@@ -3021,7 +2937,7 @@ const Index = () => {
         </div>
       </div>
       <div className="flex flex-1 flex-col justify-center gap-1 overflow-hidden">
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2"><NewsroomSoundControl />
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -3257,8 +3173,8 @@ const Index = () => {
 
   const battleHand = (
     <EnhancedGameHand
-      compact={isCompactBattle}
-      cards={gameState.hand}
+      compact
+      cards={gameState.hand.map(card => ({ ...card, cost: quoteHumanCard(gameState, card).cost }))}
       onPlayCard={handlePlayCard}
       onSelectCard={handleSelectCard}
       selectedCard={gameState.selectedCard}
@@ -3389,7 +3305,7 @@ const Index = () => {
             id="end-turn-button"
             onClick={handleEndTurn}
             className="end-turn-button newspaper-btn-primary touch-target w-full border-3 border-black bg-truth-red py-3 font-black uppercase tracking-[0.4em] text-white shadow-[4px_4px_0_hsl(0_0%_10%)] transition duration-200 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0_hsl(0_0%_10%)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0_hsl(0_0%_10%)] disabled:opacity-60 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_hsl(0_0%_10%)]"
-            disabled={isPlayerActionLocked || isEndingTurn}
+            disabled={isPlayerActionLocked || isEndingTurn || Boolean(gameState.selectedCard)}
           >
             {gameState.currentPlayer === 'ai' ? (
               <span className="flex items-center justify-center gap-2 text-sm">
@@ -3407,7 +3323,13 @@ const Index = () => {
 
   return (
     <>
-      {!isCompactBattle && <BreakingNewsTicker />}
+      {(() => {
+        const card = gameState.hand.find(c => c.id === gameState.selectedCard && requiresStateTarget(c));
+        if (!card) return null;
+        const quote = quoteHumanCard(gameState, card);
+        return <StateTargetPicker key={card.id} open={targetPickerOpen} card={card} states={gameState.states} ip={gameState.ip} cost={quote.cost} pressure={quote.pressure} targetId={gameState.targetState} locked={isPlayerActionLocked || Boolean(loadingCard)} onTarget={selectTargetState} onMap={() => setTargetPickerOpen(false)} onCancel={() => { setTargetPickerOpen(false); selectCard(null); selectTargetState(null); }} onConfirm={id => handlePlayCard(card.id, id, true)} />;
+      })()}
+      <PressDispatchTray key={gameState.playHistory[0]?.timestamp ?? "new"} records={gameState.playHistory} suspended={gameState.showNewspaper || gameState.isGameOver || targetPickerOpen || Boolean(loadingCard)} />
       {/* Online Multiplayer: Turn lock overlay + connection status */}
       {isOnlineGame && !isOnlineLocalTurn && (
         <TurnLockOverlay
@@ -3427,7 +3349,7 @@ const Index = () => {
       )}
       {isCompactBattle ? (
         <MobileBattleLayout
-          round={gameState.turn}
+          round={gameState.round}
           faction={gameState.faction}
           ip={gameState.ip}
           rivalIP={gameState.aiIP}
@@ -3440,12 +3362,12 @@ const Index = () => {
           aiTurn={gameState.currentPlayer === 'ai'}
           locked={isPlayerActionLocked}
           resolving={Boolean(loadingCard)}
-          targetCard={gameState.hand.find(card => card.id === gameState.selectedCard && card.type === 'ZONE') ?? null}
+          targetCard={gameState.hand.find(card => card.id === gameState.selectedCard && requiresStateTarget(card)) ?? null}
           playedCards={gameState.cardsPlayedThisRound}
           board={<div id="game-map-board">{battleMap}</div>}
           hand={battleHand}
           briefing={<>{renderSidebar()}{contextualHelp}</>}
-          menu={close => <div className="mobile-menu-actions">
+          menu={close => <div className="mobile-menu-actions"><NewsroomSoundControl />
             <button type="button" onClick={() => { close(); setShowInGameOptions(true); audio.playSFX('click'); }}>Game settings</button>
             <button type="button" onClick={() => { close(); setPlayerHubSource('game'); setShowPlayerHub(true); audio.playSFX('click'); }}>Player hub & archive</button>
             <button type="button" onClick={() => { close(); toggleFullscreen(); }}>{isFullscreen ? 'Exit full screen' : 'Full screen'}</button>
@@ -3595,6 +3517,7 @@ const Index = () => {
         <TabloidNewspaper
           events={gameState.currentEvents}
           playedCards={gameState.cardsPlayedThisRound}
+          round={gameState.round}
           faction={gameState.faction}
           truth={gameState.truth}
           turn={gameState.turn}

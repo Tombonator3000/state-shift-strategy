@@ -1,3 +1,7 @@
+import { useRef } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { useAudioContext } from '@/contexts/AudioContext';
 /**
  * Interactive Newspaper Return Component
  * Wraps the multi-page newspaper in a beautiful modal with header and page flip
@@ -32,9 +36,13 @@ export const NewspaperReturn = ({
   agendaIssue,
   newspaperPages,
 }: NewspaperReturnProps) => {
+  const audio = useAudioContext();
+  const returnFocus = useRef<HTMLElement | null>(null);
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <UICard className={cn(NEWSPAPER_CARD_CLASS, "max-h-[90vh] overflow-hidden flex flex-col")}>
+    <Dialog open onOpenChange={open => { if (!open) onClose(); }}><DialogPortal><DialogOverlay />
+    <DialogPrimitive.Content className="press-edition-dialog" onOpenAutoFocus={() => { returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; }} onCloseAutoFocus={event => { event.preventDefault(); returnFocus.current?.focus(); }}>
+      <DialogTitle className="sr-only">Paranoid Times · Round newspaper</DialogTitle><DialogDescription className="sr-only">Read the latest card stories and results. Continue when you are ready.</DialogDescription>
+      <UICard className={cn(NEWSPAPER_CARD_CLASS, "press-edition-paper overflow-hidden flex flex-col")}>
         {/* Header */}
         <header className={cn(NEWSPAPER_HEADER_CLASS, 'overflow-hidden flex-shrink-0')}>
           {breakingStamp && (
@@ -102,7 +110,7 @@ export const NewspaperReturn = ({
         <div className="flex-1 overflow-hidden relative">
           <NewspaperPageFlip 
             pages={newspaperPages} 
-            enableSound={true}
+            enableSound={audio.config.sfxEnabled && !audio.config.muted}
             onPageChange={(pageIndex) => {
               // Optional: Add analytics or state tracking here
               console.log('Newspaper page changed to:', pageIndex + 1);
@@ -126,6 +134,6 @@ export const NewspaperReturn = ({
           </div>
         </footer>
       </UICard>
-    </div>
+    </DialogPrimitive.Content></DialogPortal></Dialog>
   );
 };

@@ -31,16 +31,7 @@ export default defineConfig(({ mode }) => {
       shouldEnableLovableTagger && componentTagger(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: [
-          'favicon.ico',
-          'icons/*.png',
-          'icons/*.svg',
-          'assets/**/*',
-          'card-art/**/*',
-          'audio/**/*',
-          'extensions/**/*',
-          'lovable-uploads/**/*'
-        ],
+        includeAssets: ['favicon.ico', 'icons/*.png', 'icons/*.svg'],
         manifest: {
           name: 'Paranoid Times - State Shift Strategy',
           short_name: 'Paranoid Times',
@@ -117,9 +108,11 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           // Cache strategies for different resource types
-          globPatterns: ['**/*.{js,css,html,ico,png,jpg,jpeg,svg,webp,woff,woff2,mp3,json}'],
-          // Maximum cache size (100MB for game assets)
-          maximumFileSizeToCacheInBytes: 100 * 1024 * 1024,
+          globPatterns: ['**/*.{js,css,html,ico,woff,woff2}'],
+          globIgnores: ['qa/**'],
+          cleanupOutdatedCaches: true,
+          // Per-file limit; images and recordings are loaded only when used.
+          maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
           // Offline fallback
           navigateFallback: 'index.html',
           navigateFallbackDenylist: [/^\/api/, /^\/_/],
@@ -158,24 +151,18 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'images-cache',
+                cacheName: 'paranoid-images-v2',
                 expiration: {
-                  maxEntries: 500,
+                  maxEntries: 100,
+                  purgeOnQuotaError: true,
                   maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                 }
               }
             },
             {
-              // Cache audio files
+              // Stream recordings; do not put 206 range responses or the full music bank in Cache Storage.
               urlPattern: /\.(?:mp3|wav|ogg)$/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'audio-cache',
-                expiration: {
-                  maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-                }
-              }
+              handler: 'NetworkOnly',
             }
           ]
         },

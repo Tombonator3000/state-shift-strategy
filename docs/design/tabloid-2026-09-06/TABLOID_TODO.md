@@ -1,11 +1,32 @@
 # Paranoid Times – todo for funksjoner og ny avisstil
 
 Dato: 2026-09-06. Undersøkt kilde: `d05843dbee84d0bb9f84e809ab53c31595d5cd80`.
-Status: **arbeidsliste og grafikkforslag, ikke implementerte rettelser**.
+Status: **implementert i arbeidstreet; publisering og nettleserkontroll pågår**.
 
 Tom ønsker fungerende pressure-kort på mobil/PC, fungerende eksisterende musikk,
 bedre Breaking/Redacted-popuper, en mer sammenhengende tabloidstil, nye artikler
 satt sammen av rundens kort og et tydelig løft for komboer.
+
+## Implementeringsstatus 2026-09-06
+
+Implementert fra `c38743e7`: felles målvelger, pressure-paritet, ny radio,
+rundebundet avis, Breaking/Redacted/kombo-kø og tabloidstil. Detaljert bevis og
+åpne kontroller: [QA-rapport](../../qa/tabloid-2026-09-06/README.md).
+
+| Oppgaver | Status |
+| --- | --- |
+| T01–T02 | Implementert. Motor-, hook- og komponenttester består; publisert mobil/PC-reise gjenstår før nettlesergodkjenning. |
+| T03–T04 | Implementert. Feil Pages-adresse rettet; 12 spor validert med ffprobe. Theme-1 er fortsatt tom og hoppes over. Hørbar avspilling på fysisk telefon gjenstår. |
+| T05–T06 | Implementert i den synlige rundens avis. Tester for 0/1/2/3 kort og fersk runde består. Lokal deterministisk komposisjon, ingen nødvendig ekstern AI. |
+| T07–T08 | Tabloidstil og responsiv forside implementert; videre visuell kontroll skjer i publisert bygg. |
+| T09–T11 | Implementert: faktiske utfall, kilder, arkiv og én kø. Kombotester og kvitteringstester består. |
+| T12 | Hovedkøen er implementert; capture vises i kortkvittering. Enkelte eldre paranormale kosmetiske lag er beholdt. Full kollisjonskontroll i nettleser gjenstår. |
+| T13 | Eksisterende kunst gjenbrukt; papir/stempler og manglende-bilde-grafikk laget i CSS. Media ligger utenfor oppstartscachen. |
+| T14 | Delvis: redusert bevegelse, fokus og berøringsmål i implementasjonen. Fysisk mobil, 200% zoom og FPS er ikke godkjent. |
+
+Resten av dokumentet bevarer den opprinnelige todoen og kildeundersøkelsen som
+historisk arbeidsgrunnlag. Påstander om «ikke implementert» nedenfor gjelder
+planrunden, ikke denne implementeringen.
 
 ## Retningen
 

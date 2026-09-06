@@ -74,15 +74,15 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
         <Button 
           variant="ghost" 
           size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          aria-label="Audio settings" className="h-11 w-11 p-0 text-muted-foreground hover:text-foreground"
         >
           <Settings className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-4">
+      <PopoverContent className="press-dialog w-[min(384px,calc(100vw-24px))] p-4">
         <Card className="p-4 space-y-4">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-sm font-semibold text-foreground">Enhanced Audio Control</div>
+            <div className="text-sm font-semibold text-foreground">Newsroom Radio</div>
             <div className="flex gap-1">
               <Badge variant={tracksLoaded ? "default" : "destructive"} className="text-xs">
                 {tracksLoaded ? "Tracks" : "Loading"}
@@ -178,7 +178,7 @@ export const AudioControls: React.FC<AudioControlsProps> = ({
                 size="sm"
                 onClick={() => {
                   console.log('🎵 UI: Play button clicked');
-                  onPlayMusic?.();
+                  (onResumeMusic ?? onPlayMusic)?.();
                 }}
                 disabled={!musicEnabled || !tracksLoaded}
                 className="flex-1 h-8"

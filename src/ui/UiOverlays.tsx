@@ -155,6 +155,11 @@ export default function UiOverlays() {
 
   React.useEffect(() => {
     window.uiShowBreakingHeadline = (headline: BreakingHeadlinePayload) => {
+      if (document.querySelector('[data-press-desk]')) {
+        // Completed card plays already produce a receipt with their actual outcome.
+        if (headline.type === 'headline') window.dispatchEvent(new CustomEvent('press-dispatch', { detail: { id: `headline:${headline.title}`, kind: 'breaking', title: headline.title, body: [headline.body ?? 'The night desk is following this development.'], outcome: 'Newsroom bulletin', sources: [] } }));
+        return;
+      }
       enqueueBreakingHeadline(headline);
     };
 
@@ -190,6 +195,10 @@ export default function UiOverlays() {
     };
 
     window.uiExtraExtraToast = (message: string) => {
+      if (document.querySelector('[data-press-desk]')) {
+        window.dispatchEvent(new CustomEvent('press-dispatch', { detail: { id: `extra:${message}`, kind: 'breaking', title: 'EXTRA! EXTRA!', body: [message], outcome: message, sources: [] } }));
+        return;
+      }
       addToast("extraExtra", message, EXTRA_EXTRA_TOAST_LIFETIME);
     };
 

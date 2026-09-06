@@ -3,6 +3,7 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { AchievementProvider } from '@/contexts/AchievementContext';
 import { useGameState } from '@/hooks/useGameState';
 import type { GameCard } from '@/rules/mvp';
+import { quoteHumanCard } from '@/systems/cardPlayQuote';
 import type { PlayResult } from '@/hooks/useCardAnimation';
 
 afterEach(cleanup);
@@ -88,4 +89,35 @@ describe('real hook turn guards', () => {
     expect(result.current.gameState.animating).toBe(false);
   });
 
+});
+
+describe('pressure cards through both live APIs', () => {
+  for (const animated of [false, true]) {
+    it(`uses the editor pressure once and captures at the previewed threshold (${animated ? 'animated' : 'direct'})`, async () => {
+      const { result } = mount();
+      const zone: GameCard = { ...card, id: 'pressure-proof', type: 'ZONE', faction: 'government', cost: 5, effects: { pressureDelta: 2 } };
+      act(() => result.current.setGameState(prev => ({ ...prev, faction: 'government', hand: [zone], ip: 12, phase: 'action', currentPlayer: 'human', editorDef: null, editorRuntime: null, playerEditor: 'editor_redactor', playerEditorId: 'editor_redactor', editorId: 'editor_redactor', controlledStates: [], aiControlledStates: [], states: [{ ...prev.states[0], id: 'texas', abbreviation: 'TX', name: 'Texas', owner: 'neutral', pressurePlayer: 1, pressureAi: 0, pressure: 1, baseDefense: 4, defense: 4, paranormalHotspot: undefined }] })));
+      expect(quoteHumanCard(result.current.gameState, zone)).toEqual({ cost: 5, pressure: 3 });
+      await act(async () => {
+        if (animated) await result.current.playCardAnimated(zone.id, async () => ({ cancelled: false, countered: false }), 'texas');
+        else result.current.playCard(zone.id, 'TX');
+      });
+      expect(result.current.gameState.states[0].owner).toBe('player');
+      expect(result.current.gameState.states[0].pressurePlayer).toBe(0);
+      expect(result.current.gameState.hand).toEqual([]);
+      expect(result.current.gameState.cardsPlayedThisTurn).toBe(1);
+      expect(result.current.gameState.cardsPlayedThisRound[0].capturedStates).toContain('Texas');
+    });
+  }
+  it('rejects missing, owned and invalid pressure targets before either API spends resources', async () => {
+    const { result } = mount();
+    const zone: GameCard = { ...card, type: 'ZONE', effects: { pressureDelta: 2 } };
+    act(() => result.current.setGameState(prev => ({ ...prev, hand: [zone], ip: 12, targetState: null, phase: 'action', currentPlayer: 'human', states: [{ ...prev.states[0], id: 'texas', abbreviation: 'TX', name: 'Texas', owner: 'player' }] })));
+    for (const target of [undefined, 'missing', 'texas']) {
+      const before = result.current.gameState;
+      act(() => result.current.playCard(zone.id, target));
+      await act(async () => { expect((await result.current.playCardAnimated(zone.id, async () => ({ cancelled: false, countered: false }), target)).cancelled).toBe(true); });
+      expect(result.current.gameState).toBe(before);
+    }
+  });
 });

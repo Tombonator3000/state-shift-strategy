@@ -1,3 +1,4 @@
+import { NewsroomSoundControl } from '@/components/newsroom/NewsroomSoundControl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useCallback } from 'react';
@@ -362,7 +363,7 @@ const GameMenu = ({ onStartGame, onFactionHover, audio, onBackToMainMenu, onSave
 
   return uiTheme === 'tabloid_bw' ? (
     <>
-      <StartScreen
+      <div className="menu-radio"><NewsroomSoundControl /></div><StartScreen
         onStartGame={handleStartGame}
         onManageExpansions={() => setShowManageExpansions(true)}
         onHowToPlay={() => setShowHowToPlay(true)}

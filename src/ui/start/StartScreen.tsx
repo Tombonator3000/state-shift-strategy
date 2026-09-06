@@ -64,19 +64,6 @@ const StartScreen = ({
       });
     });
 
-    const glitchInterval = setInterval(() => {
-      if (Math.random() < 0.3) {
-        const buttons = ['expansions', 'options', 'howTo', 'collection', 'credits'];
-        const target = pick(buttons);
-        const glitchWords = ['███████', '???', 'REDACTED', '[CENSORED]', '??████??'];
-        setGlitchText(prev => ({ ...prev, [target]: pick(glitchWords) }));
-        setTimeout(() => {
-          setGlitchText(prev => ({ ...prev, [target]: '' }));
-        }, 800);
-      }
-    }, 3000);
-
-    return () => clearInterval(glitchInterval);
   }, []);
 
   const playClick = () => {
@@ -166,7 +153,7 @@ const StartScreen = ({
             onMouseEnter={() => setHoveredButton('expansions')}
             onMouseLeave={() => setHoveredButton(null)}
           >
-            <span className="menu-masthead">🗞️ SPECIAL EDITION</span>
+            <span className="menu-masthead">EXPANSIONS</span>
             <span className="menu-headline">
               {glitchText.expansions || menuHeadlines.expansions}
             </span>
@@ -179,7 +166,7 @@ const StartScreen = ({
             onMouseEnter={() => setHoveredButton('options')}
             onMouseLeave={() => setHoveredButton(null)}
           >
-            <span className="menu-masthead">📂 LEAKED FILES</span>
+            <span className="menu-masthead">SETTINGS</span>
             <span className="menu-headline">
               {glitchText.options || menuHeadlines.options}
             </span>
@@ -192,7 +179,7 @@ const StartScreen = ({
             onMouseEnter={() => setHoveredButton('howTo')}
             onMouseLeave={() => setHoveredButton(null)}
           >
-            <span className="menu-masthead">🔍 INSIDER INFO</span>
+            <span className="menu-masthead">HOW TO PLAY</span>
             <span className="menu-headline">
               {glitchText.howTo || menuHeadlines.howTo}
             </span>
@@ -205,7 +192,7 @@ const StartScreen = ({
             onMouseEnter={() => setHoveredButton('collection')}
             onMouseLeave={() => setHoveredButton(null)}
           >
-            <span className="menu-masthead">📚 DECLASSIFIED</span>
+            <span className="menu-masthead">CARD COLLECTION</span>
             <span className="menu-headline">
               {glitchText.collection || menuHeadlines.collection}
             </span>
@@ -218,7 +205,7 @@ const StartScreen = ({
             onMouseEnter={() => setHoveredButton('credits')}
             onMouseLeave={() => setHoveredButton(null)}
           >
-            <span className="menu-masthead">💰 DEEP DIVE</span>
+            <span className="menu-masthead">CREDITS</span>
             <span className="menu-headline">
               {glitchText.credits || menuHeadlines.credits}
             </span>

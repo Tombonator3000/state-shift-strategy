@@ -1,3 +1,5 @@
+import { composeRoundEdition } from '@/systems/news/roundEdition';
+import { RoundFrontPage } from '@/components/newsroom/RoundFrontPage';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { Card as UICard } from '@/components/ui/card';
@@ -360,6 +362,7 @@ const buildArcStatusTagline = (
 const TabloidNewspaperV2 = ({
   events,
   playedCards,
+  round,
   faction,
   truth,
   turn,
@@ -398,42 +401,9 @@ const TabloidNewspaperV2 = ({
   const altMastheadsRef = useRef<string[]>([]);
   const { weatherLine: tabloidWeatherLine } = useTabloidWeather();
 
-  const compositeStories = useMemo(() => {
-    const stories: CompositeStory[] = [];
-    const seen = new Set<string>();
-    const addStory = (story: CompositeStory | null) => {
-      if (!story) {
-        return;
-      }
-      const key = `${story.headline}::${story.subhead}`;
-      if (seen.has(key)) {
-        return;
-      }
-      seen.add(key);
-      stories.push(story);
-    };
-
-    if (Array.isArray(headlineLog)) {
-      for (const entry of headlineLog as Array<CompositeStory | ExtraExtraFeedEntry>) {
-        addStory(extractCompositeStory(entry));
-      }
-    }
-
-    if (Array.isArray(extraExtraFeed)) {
-      for (const entry of extraExtraFeed as ExtraExtraFeedEntry[]) {
-        addStory(extractCompositeStory(entry));
-      }
-    }
-
-    return stories;
-  }, [extraExtraFeed, headlineLog]);
-
-  const latestComposite = useMemo(() => {
-    if (!compositeStories.length) {
-      return null;
-    }
-    return compositeStories[compositeStories.length - 1] ?? null;
-  }, [compositeStories]);
+  const editionRound = round ?? Math.max(1, ...playedCards.map(record => record.round ?? 1));
+  const roundEdition = useMemo(() => composeRoundEdition(playedCards, events, editionRound, faction), [playedCards, events, editionRound, faction]);
+  const latestComposite = roundEdition;
 
   const runnerDispatches = useMemo(() => {
     if (!latestComposite) {
@@ -1170,7 +1140,7 @@ const TabloidNewspaperV2 = ({
     onArcProgress(arcProgressSummaries);
   }, [arcProgressSummaries, onArcProgress]);
 
-  const displayMasthead = glitchText ?? masthead;
+  const displayMasthead = PRIMARY_MASTHEAD;
   const truthProgress = Math.max(0, Math.min(100, Math.round(truth)));
   const truthDeltaLabel = formatTruthDelta(narrativeContext.truthDeltaTotal);
 
@@ -1184,7 +1154,7 @@ const TabloidNewspaperV2 = ({
       tags: [hotspotExtraArticle.kind, hotspotExtraArticle.stateName].filter(Boolean),
     } : null;
 
-    return buildNewspaperPages({
+    return [<RoundFrontPage key={`edition-${editionRound}`} edition={roundEdition} truth={truth} ip={ip} />, ...buildNewspaperPages({
       heroHeadline,
       heroSubhead,
       heroBody,
@@ -1209,8 +1179,9 @@ const TabloidNewspaperV2 = ({
       weatherLine,
       formattedAgendaQuotes,
       campaignArcGroups,
-    });
+    }).slice(1)];
   }, [
+    roundEdition, editionRound, truth, ip,
     heroHeadline,
     heroSubhead,
     heroBody,

@@ -22,6 +22,7 @@ export interface TabloidPlayedCard {
   card: GameCard;
   player: 'human' | 'ai';
   targetState?: string | null;
+  round?: number;
   truthDelta?: number;
   capturedStates?: string[];
 }
@@ -32,6 +33,7 @@ export interface TabloidNewspaperProps {
   faction: 'government' | 'truth';
   truth: number;
   turn?: number;
+  round?: number;
   ip?: number;
   controlledStates?: string[];
   totalStates?: number;

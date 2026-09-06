@@ -1,3 +1,5 @@
+import { getLastComboSummary, formatComboReward } from '@/game/comboEngine';
+import { requiresStateTarget, validStateTarget } from '@/game/stateTargeting';
 import { isHumanActionWindow } from './playerActionWindow';
 import { ECONOMIC_VICTORY_IP } from '@/game/victoryRules';
 import { useState, useCallback, useEffect, useRef } from 'react';
@@ -1113,12 +1115,7 @@ const applyEditorPlayCardAdjustments = (context: EditorPlayCardHookContext): voi
     context.logEntries.push(`${editor.name} adjusts attack IP cost by ${adjustments.attackIpCostDelta > 0 ? '+' : ''}${adjustments.attackIpCostDelta}.`);
     context.toastMessages.push(`Editor: ${adjustments.attackIpCostDelta > 0 ? '+' : ''}${adjustments.attackIpCostDelta} IP cost`);
   }
-
-  if (context.cardKind === 'ZONE' && adjustments.zonePressureBonus !== 0) {
-    context.pressureDelta += adjustments.zonePressureBonus;
-    context.logEntries.push(`${editor.name} adds ${adjustments.zonePressureBonus > 0 ? '+' : ''}${adjustments.zonePressureBonus} zone pressure.`);
-    context.toastMessages.push(`Editor: ${adjustments.zonePressureBonus > 0 ? '+' : ''}${adjustments.zonePressureBonus} pressure`);
-  }
+  // Pressure is applied by the shared engine before capture evaluation.
 };
 
 const normalizeEditorPreGameAdditions = (value: unknown): GameEditorPreGameAdditions | undefined => {
@@ -3510,6 +3507,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return prev;
       }
 
+      if (requiresStateTarget(card) && !validStateTarget(prev.states, targetOverride ?? prev.targetState)) return prev;
+
       const cardTags = Array.isArray((card as { tags?: string[] }).tags)
         ? ((card as { tags: string[] }).tags)
         : [];
@@ -3583,19 +3582,6 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       if (playContext.aiIpDelta !== 0) {
         resolution.aiIP = Math.max(0, resolution.aiIP + playContext.aiIpDelta);
-      }
-
-      if (playContext.pressureDelta !== 0 && targetState && card.type === 'ZONE') {
-        resolution.states = resolution.states.map(state => {
-          if (state.abbreviation === targetState || state.id === targetState) {
-            return {
-              ...state,
-              pressurePlayer: Math.max(0, state.pressurePlayer + playContext.pressureDelta),
-              pressure: Math.max(0, state.pressure + playContext.pressureDelta),
-            };
-          }
-          return state;
-        });
       }
 
       if (adjustmentLogs.length > 0 || playContext.logEntries.length > 0) {
@@ -3809,6 +3795,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         return { cancelled: true, countered: false };
       }
 
+      if (requiresStateTarget(card) && !validStateTarget(snapshot.states, explicitTargetState ?? snapshot.targetState)) return { cancelled: true, countered: false };
+
       const operation = { session };
       humanPlayInFlightRef.current = operation;
 
@@ -3824,6 +3812,8 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
         if (session !== gameSessionRef.current || !isHumanActionWindow(prev) || prev.cardsPlayedThisTurn >= 3 || !prev.hand.some(entry => entry.id === cardId)) {
           return prev;
         }
+
+        if (requiresStateTarget(card) && !validStateTarget(prev.states, targetState)) return prev;
 
         const cardTags = Array.isArray((card as { tags?: string[] }).tags)
           ? ((card as { tags: string[] }).tags)
@@ -4328,18 +4318,19 @@ export const useGameState = (aiDifficultyOverride?: AIDifficulty) => {
 
       const comboResult = evaluateCombosForTurn(stateForCombos, isHumanTurn ? 'human' : 'ai');
       achievements.onCombosResolved(isHumanTurn ? 'human' : 'ai', comboResult.evaluation);
-      const fxEnabled = getComboSettings().fxEnabled;
-
-      if (
-        fxEnabled &&
-        comboResult.fxMessages.length > 0 &&
-        typeof window !== 'undefined' &&
-        typeof window.uiComboToast === 'function'
-      ) {
-        for (const message of comboResult.fxMessages) {
-          window.uiComboToast(message);
+      if (getComboSettings().fxEnabled && typeof window !== 'undefined') {
+        const summary = getLastComboSummary();
+        for (const result of summary?.results ?? []) {
+          queueMicrotask(() => window.dispatchEvent(new CustomEvent('press-dispatch', { detail: {
+            id: `combo:${prev.round}:${prev.turn}:${summary?.player}:${result.definition.id}`,
+            kind: 'combo', title: result.definition.name,
+            body: [result.definition.description, result.definition.fxText ?? 'The night desk has connected the evidence. The Joint Spin Bureau requests that the connection be unmade.'],
+            outcome: formatComboReward(result.appliedReward, { faction: summary?.playerFaction }),
+            sources: result.details.matchedPlays.map(play => ({ id: play.cardId, name: play.cardName })),
+          } })));
         }
       }
+
 
       if (isHumanTurn) {
         const controlledStateCount = getControlledStateCount(prev.controlledStates);
