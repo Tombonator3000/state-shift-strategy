@@ -4,7 +4,7 @@ Arbeidet startet 2026-09-05 fra `d7e1267b1f7c9b5f517a100f9dbcef9635e8ba10`.
 Mens oppfølgingen pågikk, ble PR #800 merged på GitHub kl. 23:45:53 UTC.
 Denne oppfølgingen er flyttet til `fix/card-inspector-flow-2026-09-05` fra
 `main` / `512d25211d0a18a4bd38b9a435af5d4207b4ec6d`. De to utgangstrærne er identiske;
-ingen nye main-endringer ble overskrevet. Oppfølgingen skal leveres som egen draft-PR.
+ingen nye main-endringer ble overskrevet. Oppfølgingen er levert som [draft-PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801).
 
 ## Problem og endring
 
@@ -51,7 +51,7 @@ Siste lokale kontroll ble registrert 2026-09-06T00:00:12Z.
 | Dekningskommando | 146 pass / 0 fail, men exit 1 som tidligere | FAIL – krav beholdt |
 | Ekte desktop-/mobilreise, zoom og visuell layout | Preview-server startet, nettleseren avviste navigasjon | UNVERIFIED |
 | 60 fps / faktisk lastetid | Ikke målt | UNVERIFIED |
-| GitHub Actions | Workflow-konfigurasjonen er lagt til og YAML-parset; lokal ekvivalent er kjørt | Remote-kjøring må kontrolleres etter publisering |
+| GitHub Actions | Ren npm-installering, app-typecheck, 146 tester og bygg består på GitHub. Lint/dekning feiler og begge logger er lastet opp | [Bekreftet kjøring](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34000236010) |
 
 Dekning av importerte filer: 59,02 % funksjoner og 67,40 % linjer. Disse gjennomsnittene
 erstatter ikke filkravene. Testoppsettet logger fortsatt localStorage-/katalogfallback
@@ -83,3 +83,13 @@ komponentatferd, men måler ikke CSS-geometri eller fysisk touch.
 CI-oppsett bygger på de offisielle instruksjonene for
 [setup-node](https://github.com/actions/setup-node) og
 [setup-bun](https://github.com/oven-sh/setup-bun).
+
+## Publisert og kontrollert på GitHub
+
+[Draft-PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801) ble opprettet 2026-09-06T00:02:23Z med commit
+`0db0046c9d2504e9ae51b23ddc61ef42d323c242`. Publisert tre matcher det lokalt
+kontrollerte treet eksakt: `8b330c6507d9e3cd76b342568708a5a1b06d3eaf`.
+[Kjøring 34000236010](https://github.com/Tombonator3000/state-shift-strategy/actions/runs/34000236010) bekrefter app-typecheck, 146 tester og bygg.
+Lint har samme 438 feil / 51 varsler; dekningskommandoen feiler fortsatt.
+GitHub viser derfor lint-/dekningsjobben som feil, og begge loggene ligger i
+`lint-and-coverage-34000236010`. Denne publiseringsoppdateringen endrer bare dokumentasjon.

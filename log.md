@@ -1,3 +1,14 @@
+# 2026-09-06T00:03:59Z — Oppfølging publisert i draft-PR #801
+
+[PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801) er opprettet. Publisert kildecommit `0db0046` matcher
+kontrollert tre `8b330c6507d9e3cd76b342568708a5a1b06d3eaf` eksakt.
+GitHub Actions bekrefter ren installasjon, app-typecheck, 146 tester og bygg.
+Lint/dekning feiler som lokalt; rapportartefakt lastet opp. Ekte nettleserreise/fps
+er fortsatt uverifisert. Denne checkpointen dokumenterer levering; ingen produktendring.
+Filer: `log.md`, `UPDATES_LOG.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-05-card-flow/README.md`, `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/results.json`.
+
+---
+
 # 2026-09-06T00:00:12Z — Kortdetaljer, discard og PR-kontroller
 
 Oppfølging fra PR #800. GitHub viste merge kl. 2026-09-05T23:45:53Z mens arbeidet

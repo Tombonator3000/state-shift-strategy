@@ -3,7 +3,7 @@
 Oppdatert 2026-09-06. Dette er den aktive planen. Den tidligere planen er bevart i
 [arkivet](_archive/roadmap-2025-10-11.md). [PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800)
 ble merged 2026-09-05 kl. 23:45:53 UTC. Ny oppfølging ligger på
-`fix/card-inspector-flow-2026-09-05` og skal vurderes i egen draft-PR.
+`fix/card-inspector-flow-2026-09-05` i [draft-PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801).
 
 ## Mål og spillopplevelse
 
@@ -54,7 +54,7 @@ Komponenttestene bekrefter dialogatferd; ekte nettleserreise, mobilgeometri og f
 | P1 | Test ekte kort- og artikkelkatalog | Filbasert testlasting av alle aktive ekspansjoner og statiske artikler; ingen stille sekskorts-fallback i dekningstesten; ID-er, bilder og artikkeloppslag kontrolleres. | Bevar dagens kilde/generert-forhold |
 | P1 | Sammenlign live-spill og simuleringsmotor | Samme deterministiske sekvens gir samme IP, Truth, eierskap, agenda og avis. Prioriter HYBRID-pris, TRAP-tidspunkt og PERSISTENT-varighet. | Katalogfixture og små adaptersammenligninger |
 | P1 | Rydd lint-gjeld og inaktive tester | Reduser dagens lint- og dekningsfeil i avgrensede moduler uten å slå av reglene. Hver av de 63 `.disabled`-testene får beslutning: aktiver med reell verdi, erstatt eller slett med begrunnelse. | Baseline og faktisk importgraf |
-| P1 | Følg opp PR-kontroller i CI | Ny `Game checks`-workflow kjører ren npm-installering, app-typecheck, Bun-tester og bygg. Lint og dekning rapporteres separat og feiler ærlig. Kontroller første remote-kjøring og reduser gjelden. | GitHub Actions-kjøringen i oppfølgings-PR-en |
+| P1 | Følg opp PR-kontroller i CI | Ny `Game checks`-workflow kjører ren npm-installering, app-typecheck, Bun-tester og bygg. Lint og dekning rapporteres separat og feiler ærlig. Første GitHub-kjøring er bekreftet; reduser lint-/dekningsgjelden. | GitHub Actions-kjøringen i oppfølgings-PR-en |
 | P2 | Mål og forbedre lasting/ytelse | Profilér før endring. Reduser initialt innhold og ~104 MiB PWA-precache uten å miste offline-funksjon eller avisarkiv; dokumenter kald/varm lasting. | Ekte produksjonsbygg og valgt målenhet |
 | P2 | 60 fps under representativ spilling | Etter oppvarming: ca. to minutter med kart, kort, effekter og aviser. Registrer enhet, oppløsning, snitt, p95/p99 og lange stopp. Foreløpige mål: p95 ≤16,67 ms, p99 <20 ms med oppgitt måleusikkerhet. | Samme visuelle innstillinger som godkjennes |
 | P2 | Fullfør grafisk konsistens | Samme teksthierarki, fraksjonsfarger, korttyper og fokusmarkering i samling, nye kort, detaljvisning og mobil. Faktiske korttekster er redigerbar UI. | Skjermbilder og brukerreise |
