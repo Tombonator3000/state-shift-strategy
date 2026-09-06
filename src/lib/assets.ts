@@ -18,10 +18,10 @@
  * // Lovable: '/assets/start/start-gov.jpeg'
  * // GitHub Pages: '/state-shift-strategy/assets/start/start-gov.jpeg'
  */
-export function getAssetPath(path: string): string {
+export function getAssetPath(path: string, base = import.meta.env?.BASE_URL ?? '/'): string {
   // Remove leading slash to prevent double slashes
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
 
   // import.meta.env.BASE_URL already has trailing slash
-  return `${import.meta.env.BASE_URL}${cleanPath}`;
+  return `${base.endsWith('/') ? base : `${base}/`}${cleanPath}`;
 }

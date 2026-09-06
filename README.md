@@ -8,6 +8,7 @@ Spillets eksisterende engelske kort- og avistekst er beholdt.
 - [Aktiv forbedringsplan](docs/roadmap.md)
 - [Gauntlet: funn, tester og åpne porter](docs/analysis/gauntlet-2026-09-05/README.md)
 - [Oppfølging: kortdetaljer, discard og PR-kontroller](docs/analysis/gauntlet-2026-09-05-card-flow/README.md)
+- [Oppfølging: oppstart, lagring og ekte kortkatalog](docs/analysis/gauntlet-2026-09-06-startup/README.md)
 - [Spilldesign](DESIGN_DOC_MVP.md), [teknisk oversikt](docs/TECHNICAL_README.md)
 - [Arbeidslogg](log.md), [endringshistorikk](UPDATES_LOG.md)
 
@@ -44,11 +45,17 @@ PR-er kjører `Game checks`: app-typecheck, aktive tester og produksjonsbygg i �
 lint og dekning i en separat jobb. Sistnevnte viser kjent gjeld som feil og lagrer
 begge loggene som artefakt; ingen lint-regler eller dekningskrav er slått av.
 
+Kortkatalogen importeres likt i Vite og Bun. Nye aktive filer i `src/data/core/`
+må registreres i `CORE_CARD_SOURCES` i `src/data/core/index.ts`; katalogtesten
+oppdager manglende registrering. De to Midnight-pakkene vises som utilgjengelige
+inntil motoren støtter alle effektene deres. Kildene er bevart.
+
 ## Redigering og publisering
 
 Kildeprosjektet er også knyttet til [Lovable](https://lovable.dev/projects/fa2f38e2-5939-4c65-a945-2c0f8029da84).
 Den eksisterende GitHub Pages-workflowen bygger og publiserer ved push til `main`.
-Arbeid på en egen gren og gjennomgå PR før merge. Denne reparasjonen publiserer ikke spillet.
+Arbeid på en egen gren og gjennomgå PR før merge. PR #800 og #801 er merget;
+se arbeidsloggen for senere rettelser og dokumentert publiseringsstatus.
 Lovable-taggeren er valgfri: `ENABLE_LOVABLE_TAGGER=true npm run dev`.
 
 ## Card art assets

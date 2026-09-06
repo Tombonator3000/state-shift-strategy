@@ -1,11 +1,11 @@
 import type { Card } from '@/lib/decks/expansions';
 import type { GameCard } from '@/rules/mvp';
-import { validateMvpCard } from '@/utils/validate-mvp';
+import { readExpansionCard } from './cardValidation';
 import { BUILTIN_EXPANSION_SOURCES } from '@/data/expansions/builtin';
+import { fetchAssetJson } from '@/lib/fetchAssetJson';
 
 const INDEX_PATH = '/extensions/index.json';
 const MANIFEST_PATH = '/extensions/manifest.json';
-const CACHE_BYPASS_PARAM = () => `t=${Date.now()}`;
 
 const FALLBACK_FILES = ['cryptids.json', 'halloween_spooktacular_with_temp_image.json'];
 
@@ -28,6 +28,8 @@ export interface DiscoveredExpansion {
   author?: string;
   fileName: string;
   cards: Card[];
+  rejectedCardCount?: number;
+  unavailableReason?: string;
 }
 
 let cachedExpansions: DiscoveredExpansion[] | null = null;
@@ -84,14 +86,7 @@ const decorateCard = (card: GameCard, setId: string, setName: string): Card => (
 
 const readJsonList = async (url: string): Promise<string[]> => {
   try {
-    const response = await fetch(`${url}?${CACHE_BYPASS_PARAM()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-    });
-    if (!response.ok) {
-      return [];
-    }
-    const data = await response.json();
+    const data = await fetchAssetJson(url);
     if (Array.isArray(data)) {
       return data.filter((item): item is string => typeof item === 'string');
     }
@@ -122,16 +117,7 @@ const loadFileList = async (): Promise<string[]> => {
 
 const parseExpansionFile = async (fileName: string): Promise<DiscoveredExpansion | null> => {
   try {
-    const response = await fetch(`/extensions/${fileName}?${CACHE_BYPASS_PARAM()}`, {
-      cache: 'no-store',
-      headers: { 'Cache-Control': 'no-cache' },
-    });
-    if (!response.ok) {
-      console.warn(`[ExpansionDiscovery] Skipping ${fileName}, response: ${response.status}`);
-      return null;
-    }
-
-    const raw = (await response.json()) as RawExpansion | RawExpansion['cards'];
+    const raw = await fetchAssetJson(`/extensions/${fileName}`);
     const cardSources = toCardArray(raw);
 
     const baseName = fileName.replace(/\.json$/i, '');
@@ -143,16 +129,15 @@ const parseExpansionFile = async (fileName: string): Promise<DiscoveredExpansion
 
     const cards: Card[] = [];
     const seen = new Set<string>();
+    let rejectedCardCount = 0;
+    let unsupportedCards = 0;
 
     for (const entry of cardSources) {
-      if (!entry || typeof entry !== 'object') {
-        continue;
-      }
-
-      const card = { ...(entry as GameCard) };
-      const validation = validateMvpCard(card);
-      if (!validation.ok) {
-        console.warn(`[ExpansionDiscovery] Invalid card in ${fileName}:`, validation.issues);
+      const result = readExpansionCard(entry);
+      const card = result.card;
+      if (!card) {
+        rejectedCardCount++;
+        if (result.unsupported) unsupportedCards++;
         continue;
       }
 
@@ -164,10 +149,11 @@ const parseExpansionFile = async (fileName: string): Promise<DiscoveredExpansion
       cards.push(decorateCard(card, setId, nameCandidate));
     }
 
-    if (cards.length === 0) {
-      console.warn(`[ExpansionDiscovery] No valid cards found in ${fileName}`);
-      return null;
-    }
+    const unavailableReason = cards.length === 0
+      ? unsupportedCards > 0
+        ? `${rejectedCardCount} cards need effects that this game version does not support yet.`
+        : 'No playable cards found. This pack needs updated card definitions.'
+      : undefined;
 
     const metadata = raw as RawExpansion;
 
@@ -179,6 +165,8 @@ const parseExpansionFile = async (fileName: string): Promise<DiscoveredExpansion
       author: typeof metadata?.author === 'string' ? metadata.author : undefined,
       fileName,
       cards,
+      rejectedCardCount,
+      unavailableReason,
     };
   } catch (error) {
     console.warn(`[ExpansionDiscovery] Failed to parse ${fileName}:`, error);
@@ -196,13 +184,8 @@ const discoverInternal = async (): Promise<DiscoveredExpansion[]> => {
     ),
   );
 
-  const discovered: DiscoveredExpansion[] = [];
-  for (const fileName of uniqueFiles) {
-    const expansion = await parseExpansionFile(fileName);
-    if (expansion) {
-      discovered.push(expansion);
-    }
-  }
+  const loaded = await Promise.all(uniqueFiles.map(parseExpansionFile));
+  const discovered = loaded.filter((pack): pack is DiscoveredExpansion => pack !== null);
 
   discovered.sort((a, b) => a.name.localeCompare(b.name));
   return discovered;

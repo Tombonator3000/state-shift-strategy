@@ -18,6 +18,18 @@
     "hooks": "@/hooks"
   },
   "surfaces": {
+    "ManageExpansions": {
+      "path": "src/components/game/ManageExpansions.tsx",
+      "description": "Expansion library with card counts, persistent unavailability reasons, disabled unsupported packs and partial-import notices."
+    },
+    "ExpansionControl": {
+      "path": "src/components/expansions/ExpansionControl.tsx",
+      "description": "Deck mixing controls and previews with explicit unavailable-pack status and guarded activation."
+    },
+    "AppStartup": {
+      "path": "src/components/AppStartup.tsx",
+      "description": "Visible startup progress, persistent loading/error messages, reload action and application error boundary."
+    },
     "ParapediaPanel": {
       "path": "src/components/game/parapedia/ParapediaPanel.tsx",
       "description": "Truth Bureau knowledge vault with atlas navigation, search, and state dossiers."

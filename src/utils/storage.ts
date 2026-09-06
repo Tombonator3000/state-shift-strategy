@@ -14,7 +14,8 @@ const resolveLogger = (options?: SafeStorageOptions): Pick<Console, 'warn'> | nu
   return null;
 };
 
-export const safeGetLocalStorageItem = (
+const safeGetStorageItem = (
+  kind: 'localStorage' | 'sessionStorage',
   key: string,
   options?: SafeStorageOptions,
 ): string | null => {
@@ -23,7 +24,7 @@ export const safeGetLocalStorageItem = (
   }
 
   try {
-    const storage = window.localStorage;
+    const storage = window[kind];
     if (!storage || typeof storage.getItem !== 'function') {
       return null;
     }
@@ -31,12 +32,13 @@ export const safeGetLocalStorageItem = (
     return storage.getItem(key);
   } catch (error) {
     const logger = resolveLogger(options);
-    logger?.warn?.(`[storage] Failed to read "${key}" from localStorage`, error);
+    logger?.warn?.(`[storage] Failed to read "${key}" from ${kind}`, error);
     return null;
   }
 };
 
-export const safeSetLocalStorageItem = (
+const safeSetStorageItem = (
+  kind: 'localStorage' | 'sessionStorage',
   key: string,
   value: string,
   options?: SafeStorageOptions,
@@ -46,7 +48,7 @@ export const safeSetLocalStorageItem = (
   }
 
   try {
-    const storage = window.localStorage;
+    const storage = window[kind];
     if (!storage || typeof storage.setItem !== 'function') {
       return false;
     }
@@ -55,10 +57,22 @@ export const safeSetLocalStorageItem = (
     return true;
   } catch (error) {
     const logger = resolveLogger(options);
-    logger?.warn?.(`[storage] Failed to write "${key}" to localStorage`, error);
+    logger?.warn?.(`[storage] Failed to write "${key}" to ${kind}`, error);
     return false;
   }
 };
+
+export const safeGetLocalStorageItem = (key: string, options?: SafeStorageOptions): string | null =>
+  safeGetStorageItem('localStorage', key, options);
+
+export const safeSetLocalStorageItem = (key: string, value: string, options?: SafeStorageOptions): boolean =>
+  safeSetStorageItem('localStorage', key, value, options);
+
+export const safeGetSessionStorageItem = (key: string, options?: SafeStorageOptions): string | null =>
+  safeGetStorageItem('sessionStorage', key, options);
+
+export const safeSetSessionStorageItem = (key: string, value: string, options?: SafeStorageOptions): boolean =>
+  safeSetStorageItem('sessionStorage', key, value, options);
 
 export const safeRemoveLocalStorageItem = (
   key: string,

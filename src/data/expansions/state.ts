@@ -38,7 +38,7 @@ let cachedCards: GameCard[] = [];
 let loadingPromise: Promise<GameCard[]> | null = null;
 const listeners = new Set<Listener>();
 
-const getManifestIdSet = () => new Set(EXPANSION_MANIFEST.map(pack => pack.id));
+const getManifestIdSet = () => new Set(EXPANSION_MANIFEST.filter(pack => pack.cards.length > 0).map(pack => pack.id));
 
 const notify = () => {
   const snapshotCards = getExpansionCardsSnapshot();

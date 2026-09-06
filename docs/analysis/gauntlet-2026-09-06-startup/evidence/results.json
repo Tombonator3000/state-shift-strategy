@@ -1,0 +1,137 @@
+{
+  "verified_at": "2026-09-06T00:32:40Z",
+  "base_commit": "4e929c063bf7422bfa377b6da2f9318ccc26c43f",
+  "runtime": {
+    "node": "24.19.0",
+    "npm": "11.9.0",
+    "bun": "1.4.2"
+  },
+  "checks": [
+    {
+      "check": "build-pages",
+      "command": "env GITHUB_PAGES=true npm run build",
+      "startedAt": "2026-09-06T00:29:41.700772+00:00",
+      "seconds": 12.74,
+      "exitCode": 0,
+      "log": "build-pages.log"
+    },
+    {
+      "check": "build",
+      "command": "npm run build",
+      "startedAt": "2026-09-06T00:29:01.382800+00:00",
+      "seconds": 16.95,
+      "exitCode": 0,
+      "log": "build.log"
+    },
+    {
+      "check": "lint",
+      "command": "npm run lint",
+      "startedAt": "2026-09-06T00:30:13.691275+00:00",
+      "seconds": 6.56,
+      "exitCode": 1,
+      "log": "lint.log"
+    },
+    {
+      "check": "targeted",
+      "command": "npm exec --yes --package=bun@1.4.2 -- bun test __tests__/startup.test.tsx __tests__/assetLoading.test.ts __tests__/extensionRecovery.test.ts __tests__/game/coreCatalog.test.ts",
+      "startedAt": "2026-09-06T00:28:35.496331+00:00",
+      "seconds": 10.13,
+      "exitCode": 0,
+      "log": "targeted.log"
+    },
+    {
+      "check": "tests-coverage",
+      "command": "npm exec --yes --package=bun@1.4.2 -- bun test --coverage --coverage-reporter=text",
+      "startedAt": "2026-09-06T00:29:17.149938+00:00",
+      "seconds": 10.79,
+      "exitCode": 1,
+      "log": "tests-coverage.log"
+    },
+    {
+      "check": "tests",
+      "command": "npm exec --yes --package=bun@1.4.2 -- bun test",
+      "startedAt": "2026-09-06T00:29:01.393317+00:00",
+      "seconds": 10.89,
+      "exitCode": 0,
+      "log": "tests.log"
+    },
+    {
+      "check": "typecheck",
+      "command": "npm run typecheck",
+      "startedAt": "2026-09-06T00:29:01.377585+00:00",
+      "seconds": 13.51,
+      "exitCode": 0,
+      "log": "typecheck.log"
+    }
+  ],
+  "tests": {
+    "pass": 168,
+    "fail": 0,
+    "assertions": 622,
+    "files": 41,
+    "new_tests": 22
+  },
+  "lint": {
+    "errors": 410,
+    "warnings": 51,
+    "prior_errors": 438,
+    "prior_warnings": 51
+  },
+  "coverage": {
+    "exit_code": 1,
+    "functions_percent": 64.29,
+    "lines_percent": 71.2,
+    "thresholds_changed": false
+  },
+  "catalog": {
+    "core": 424,
+    "core_truth": 212,
+    "core_government": 212,
+    "external_supported": 500,
+    "external_unavailable": 40,
+    "external_source_files": 4
+  },
+  "browser": {
+    "status": "UNVERIFIED",
+    "previous_navigation_error": "net::ERR_BLOCKED_BY_CLIENT",
+    "new_browser_attempt": false,
+    "fps_measured": false,
+    "offline_quota_tested": false
+  },
+  "merged_previous_pr": {
+    "number": 801,
+    "sha": "4e929c063bf7422bfa377b6da2f9318ccc26c43f",
+    "merged_at": "2026-09-06T00:13:38Z"
+  },
+  "delivery": {
+    "branch": "fix/startup-and-catalog-2026-09-06",
+    "status": "local_verified_pending_pr_checks_and_requested_merge"
+  },
+  "logs": {
+    "archive": "check-logs.tar.gz",
+    "sha256": "d5a5bd90e292bd29d42e8b97c31b85f2f6cdf653a6b41c568fae1be0887a283a",
+    "contents": [
+      "build-pages.log",
+      "build.log",
+      "iteration1-catalog.log",
+      "iteration2-typecheck.log",
+      "lint.log",
+      "targeted.log",
+      "tests-coverage.log",
+      "tests.log",
+      "typecheck.log",
+      "build-pages.result.json",
+      "build.result.json",
+      "iteration2-typecheck.result.json",
+      "lint.result.json",
+      "targeted.result.json",
+      "tests-coverage.result.json",
+      "tests.result.json",
+      "typecheck.result.json"
+    ]
+  },
+  "intermediate_failures": {
+    "iteration1-catalog.log": "2 failed expectations: initial assumption that all 540 external cards were supported; actual definitions require explicit quarantine of 40 unsupported cards.",
+    "iteration2-typecheck.log": "Faction union mismatch in new normalization; fixed before final checks."
+  }
+}

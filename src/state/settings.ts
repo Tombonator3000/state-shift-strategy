@@ -9,12 +9,8 @@ type StoredGameSettings = {
 };
 
 const readStoredGameSettings = (): StoredGameSettings | null => {
-  if (typeof localStorage === "undefined") {
-    return null;
-  }
-
   try {
-    const stored = localStorage.getItem(OPTIONS_STORAGE_KEY);
+    const stored = safeGetLocalStorageItem(OPTIONS_STORAGE_KEY);
     if (!stored) {
       return null;
     }

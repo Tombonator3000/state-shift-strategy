@@ -141,12 +141,14 @@ const ExpansionPanel = ({ detail, onToggle, isUpdating }: ExpansionPanelProps) =
               <Switch
                 checked={enabled}
                 onCheckedChange={() => onToggle(pack.id)}
-                disabled={isUpdating}
+                disabled={isUpdating || pack.cards.length === 0}
                 aria-label={`Toggle ${pack.title}`}
               />
             </div>
           </div>
           <p className="mt-2 line-clamp-2 text-xs text-newspaper-text/70">{description}</p>
+          {pack.unavailableReason && <p role="status" className="mt-2 text-sm font-semibold text-red-800">Unavailable: {pack.unavailableReason}</p>}
+          {!pack.unavailableReason && Boolean(pack.rejectedCardCount) && <p className="mt-2 text-sm text-red-800">{pack.rejectedCardCount} cards could not be loaded.</p>}
         </CardHeader>
         <CollapsibleContent className="data-[state=closed]:hidden">
           <CardContent className="flex flex-1 flex-col gap-3 p-4 text-sm text-newspaper-text">
@@ -377,6 +379,7 @@ const ManageExpansions = ({ onClose }: ManageExpansionsProps) => {
   }, [expansionManifest]);
 
   const handleExpansionToggle = async (expansionId: string) => {
+    if (!expansionManifest.find(pack => pack.id === expansionId)?.cards.length) return;
     setUpdateError(null);
     const isCurrentlyEnabled = enabledExpansions.includes(expansionId);
     const wasEmpty = enabledExpansions.length === 0;

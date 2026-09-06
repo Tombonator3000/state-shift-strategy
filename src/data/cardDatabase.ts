@@ -3,7 +3,7 @@ import { expectedCost, MVP_COST_TABLE } from '@/rules/mvp';
 import { repairToMVP, validateCardMVP } from '@/mvp/validator';
 import { getExtensionCardsSnapshot } from './extensionSystem';
 
-const DEV = typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV;
+const DEV = import.meta.env?.DEV;
 
 const MVP_TYPES: readonly MVPCardType[] = ['ATTACK', 'MEDIA', 'ZONE'];
 const MVP_RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
@@ -126,7 +126,7 @@ async function loadCoreCards(): Promise<GameCard[]> {
       }
 
       return normalized;
-    } catch (error) {
+    } catch {
       console.warn('⚠️ [CARD DATABASE] Core collector not available, using fallback MVP set');
       _coreCards = FALLBACK_CARDS;
       return FALLBACK_CARDS;
