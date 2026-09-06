@@ -1,0 +1,11 @@
+{
+  "src/components/game/CardDetailOverlay.tsx": "e29b72cc05d25bff4ed75565924683e4a70a66e43bafcea8c0d16615a4e339aa",
+  "src/components/game/EnhancedGameHand.tsx": "c3a2cdc5d41e72eec071564d766d513490174d27dcac3bad3120bb1fa5faf97a",
+  "src/styles/card-inspector.css": "f386346e5d8170b0008ec6d32cf030cf9fe9a519a41c8b576202e19051498ab2",
+  "__tests__/game/cardInspector.test.tsx": "1ee9f9796603794146069306a58abf135314250cb55ca87c1e7750c88a528910",
+  ".github/workflows/game-checks.yml": "2efe7ecd1ffeb2d7daadd3cad3bd4538e194725c8b42cc5e1656c9a70cf6c0b8",
+  "components.json": "9efcd6c85dc023ef57ab47ff04bf35310bcc439d19b607840ebbec70c7f6ebff",
+  "package.json": "18b50428af20aa1a293046ae54fa27d837615e43aee02f1f617ca679751f4e00",
+  "package-lock.json": "3f341aee6f452d51a1cc8955da140a0486d46ecdf0122cb19c2fe24c3c30a3c2",
+  "bunfig.toml": "bab54632a2755058bc546f7e7322f05c47c0d3b50f4ac32a8df309f58f779beb"
+}

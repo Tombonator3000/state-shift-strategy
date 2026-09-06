@@ -1,3 +1,60 @@
+# 2026-09-06T00:03:59Z — Oppfølging publisert i draft-PR #801
+
+[PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801) er opprettet. Publisert kildecommit `0db0046` matcher
+kontrollert tre `8b330c6507d9e3cd76b342568708a5a1b06d3eaf` eksakt.
+GitHub Actions bekrefter ren installasjon, app-typecheck, 146 tester og bygg.
+Lint/dekning feiler som lokalt; rapportartefakt lastet opp. Ekte nettleserreise/fps
+er fortsatt uverifisert. Denne checkpointen dokumenterer levering; ingen produktendring.
+Filer: `log.md`, `UPDATES_LOG.md`, `docs/roadmap.md`, `docs/analysis/gauntlet-2026-09-05-card-flow/README.md`, `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/results.json`.
+
+---
+
+# 2026-09-06T00:00:12Z — Kortdetaljer, discard og PR-kontroller
+
+Oppfølging fra PR #800. GitHub viste merge kl. 2026-09-05T23:45:53Z mens arbeidet
+pågikk; oppfølgingen er derfor flyttet til `fix/card-inspector-flow-2026-09-05`
+fra merge-commit `512d252`. Utgangstrærne er identiske. Denne oppfølgingen er unmerged.
+
+Full korttekst, Radix-dialog med fokus/Tab/Escape, separat discard-lås etter tre
+spill, vertikal lesing uten lukking, umiddelbart ZONE-målvalg og status ved hånden.
+Fjernet duplikat installasjonslås; lagt til synlige PR-kontroller uten å skjule
+lint-/dekningsfeil. CSS-spesifisitet rettet etter inspeksjon av produsert CSS.
+
+Lokalt: app-typecheck og bygg exit 0; Bun 146 pass / 0 fail, 552 assertions i 37 filer.
+Åtte nye regresjonstester består. Lint 438 feil / 51 varsler (før 439 / 51); coverage
+fortsatt exit 1. Nettleser avvist med ERR_BLOCKED_BY_CLIENT, selv med kjørende
+preview. Ingen visuelle runtime- eller fps-påstander. Server/fane stoppet etterpå.
+GitHub Actions må kontrolleres etter publisering; regler og terskler er beholdt.
+
+[Rapport](docs/analysis/gauntlet-2026-09-05-card-flow/README.md) ·
+[Endrede filer](docs/analysis/gauntlet-2026-09-05-card-flow/changes.md).
+
+Filer:
+- `A` `.github/workflows/game-checks.yml`
+- `M` `README.md`
+- `M` `UPDATES_LOG.md`
+- `A` `__tests__/game/cardInspector.test.tsx`
+- `D` `bun.lock`
+- `M` `components.json`
+- `M` `docs/TECHNICAL_README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/README.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/changes.md`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/build.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests-summary.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/typecheck.log`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/lint.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/results.json`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tested-source-sha256.json`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests-coverage.log.gz`
+- `A` `docs/analysis/gauntlet-2026-09-05-card-flow/evidence/tests.log.gz`
+- `M` `docs/roadmap.md`
+- `M` `log.md`
+- `M` `src/components/game/CardDetailOverlay.tsx`
+- `M` `src/components/game/EnhancedGameHand.tsx`
+- `A` `src/styles/card-inspector.css`
+
+---
+
 # 2026-09-05T20:32:30Z — Draft-PR #800 opprettet
 
 Brukeren autoriserte push og draft-PR eksplisitt. Repo/skrivetilgang bekreftet.

@@ -1,7 +1,9 @@
 # Paranoid Times – forbedringsplan
 
-Oppdatert 2026-09-05. Dette er den aktive planen. Den tidligere planen er bevart i
-[arkivet](_archive/roadmap-2025-10-11.md). Status gjelder [draft-PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800). Grenen er publisert; ingen merge eller utrulling av spillet er utført.
+Oppdatert 2026-09-06. Dette er den aktive planen. Den tidligere planen er bevart i
+[arkivet](_archive/roadmap-2025-10-11.md). [PR #800](https://github.com/Tombonator3000/state-shift-strategy/pull/800)
+ble merged 2026-09-05 kl. 23:45:53 UTC. Ny oppfølging ligger på
+`fix/card-inspector-flow-2026-09-05` i [draft-PR #801](https://github.com/Tombonator3000/state-shift-strategy/pull/801).
 
 ## Mål og spillopplevelse
 
@@ -16,7 +18,7 @@ kontrolleres 200 IP og 10 delstater. Scenarioenes terskler skal følges der de e
 Reglene i `src/game/victoryRules.ts` og `src/constants/truthThresholds.ts` er felles
 referanse for denne seiersvurderingen.
 
-## Gjennomført i denne grenen
+## Gjennomført i PR #800
 
 - Rettet feil vinner ved Truth-tersklene og forskjellen mellom 200/300 IP i spill og simulering.
 - Sperret kortspill utenfor egen handlingsfase, samtidige spill og turavslutning under kortanimasjon.
@@ -31,6 +33,18 @@ referanse for denne seiersvurderingen.
 Dette er en reparasjonsmilepæl med automatiske kontroller, ikke en ferdig godkjent
 visuell versjon. [Gauntlet-rapporten](analysis/gauntlet-2026-09-05/README.md) viser åpne porter.
 
+## Ny oppfølging: kortdetaljer og kontroller
+
+- Kortdetaljer viser full tekst og har navngitt dialog, fokuslås, Escape og tilbakeføring av fokus.
+- Discard fra detaljvisningen fungerer også etter tre kortspill; motstanderens tur er fortsatt sperret.
+- Vertikal lesing lukker ikke kortet; horisontal sveiping på bildet bytter kort. ZONE-valg lukker dialogen straks.
+- Det ekstra svarte laget under kortspill er erstattet av status ved hånden.
+- Én installasjonslås (`package-lock.json`), pluss PR-jobber for typecheck/test/bygg og synlig lint-/dekningsgjeld.
+- Lokalt: 146 tester består, typecheck og bygg består; lint 438 feil / 51 varsler, dekning exit 1.
+
+[Oppfølgingsrapporten](analysis/gauntlet-2026-09-05-card-flow/README.md) viser tester og begrensninger.
+Komponenttestene bekrefter dialogatferd; ekte nettleserreise, mobilgeometri og fps er fortsatt uverifisert.
+
 ## Prioritert videre arbeid
 
 | Prioritet | Avgrenset oppgave | Ferdig når | Avhengighet |
@@ -40,7 +54,7 @@ visuell versjon. [Gauntlet-rapporten](analysis/gauntlet-2026-09-05/README.md) vi
 | P1 | Test ekte kort- og artikkelkatalog | Filbasert testlasting av alle aktive ekspansjoner og statiske artikler; ingen stille sekskorts-fallback i dekningstesten; ID-er, bilder og artikkeloppslag kontrolleres. | Bevar dagens kilde/generert-forhold |
 | P1 | Sammenlign live-spill og simuleringsmotor | Samme deterministiske sekvens gir samme IP, Truth, eierskap, agenda og avis. Prioriter HYBRID-pris, TRAP-tidspunkt og PERSISTENT-varighet. | Katalogfixture og små adaptersammenligninger |
 | P1 | Rydd lint-gjeld og inaktive tester | Reduser dagens lint- og dekningsfeil i avgrensede moduler uten å slå av reglene. Hver av de 63 `.disabled`-testene får beslutning: aktiver med reell verdi, erstatt eller slett med begrunnelse. | Baseline og faktisk importgraf |
-| P1 | Sett PR-kontroller i CI | Ren `npm ci`, app-typecheck, Bun-tester og bygg må kjøre på PR. Lint skal vise kjent gjeld tydelig til den kan blokke på null feil. | Verifiser runtime-versjoner og eksisterende Pages-workflow |
+| P1 | Følg opp PR-kontroller i CI | Ny `Game checks`-workflow kjører ren npm-installering, app-typecheck, Bun-tester og bygg. Lint og dekning rapporteres separat og feiler ærlig. Første GitHub-kjøring er bekreftet; reduser lint-/dekningsgjelden. | GitHub Actions-kjøringen i oppfølgings-PR-en |
 | P2 | Mål og forbedre lasting/ytelse | Profilér før endring. Reduser initialt innhold og ~104 MiB PWA-precache uten å miste offline-funksjon eller avisarkiv; dokumenter kald/varm lasting. | Ekte produksjonsbygg og valgt målenhet |
 | P2 | 60 fps under representativ spilling | Etter oppvarming: ca. to minutter med kart, kort, effekter og aviser. Registrer enhet, oppløsning, snitt, p95/p99 og lange stopp. Foreløpige mål: p95 ≤16,67 ms, p99 <20 ms med oppgitt måleusikkerhet. | Samme visuelle innstillinger som godkjennes |
 | P2 | Fullfør grafisk konsistens | Samme teksthierarki, fraksjonsfarger, korttyper og fokusmarkering i samling, nye kort, detaljvisning og mobil. Faktiske korttekster er redigerbar UI. | Skjermbilder og brukerreise |

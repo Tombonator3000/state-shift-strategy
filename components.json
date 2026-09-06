@@ -36,7 +36,11 @@
     },
     "EnhancedGameHand": {
       "path": "src/components/game/EnhancedGameHand.tsx",
-      "description": "Readable card captions, separate discard buttons, touch scrolling and card-detail deployment."
+      "description": "Readable hand, independent discard controls after the play limit, horizontal card browsing and inline deployment status."
+    },
+    "CardDetailOverlay": {
+      "path": "src/components/game/CardDetailOverlay.tsx",
+      "description": "Accessible card dossier with full rules and flavor text, scrollable content, deployment and discard actions, Escape and focus restoration."
     },
     "VictoryConditions": {
       "path": "src/components/game/VictoryConditions.tsx",
